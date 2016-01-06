@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -30,8 +31,8 @@ public class ShowImages extends AppCompatActivity {
     private final static int PICK_GALLERY = 0x2;
     private final static int MY_REQUEST_CODE = 0x1;
 
-    private Button btnLoadLeft;
-    private Button btnLoadRight;
+    private Button btnBuild;
+    private SeekBar seekBar;
     private ImageView imgLeft;
     private ImageView imgRight;
     private ImageView imgEdit;
@@ -45,8 +46,8 @@ public class ShowImages extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_images);
 
-        btnLoadLeft  = (Button) findViewById(R.id.btnLoadLeft);
-        btnLoadRight = (Button) findViewById(R.id.btnLoadRight);
+        seekBar  = (SeekBar)   findViewById(R.id.seekBar);
+        btnBuild = (Button)    findViewById(R.id.btnBuild);
         imgLeft  = (ImageView) findViewById(R.id.imgLeft);
         imgRight = (ImageView) findViewById(R.id.imgRight);
         imgEdit  = (ImageView) findViewById(R.id.imgEdit);
@@ -70,16 +71,10 @@ public class ShowImages extends AppCompatActivity {
             }
         }
 
-        btnLoadLeft.setOnClickListener(new View.OnClickListener() {
+        btnBuild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImage(SELECT_PHOTO_LEFT);
-            }
-        });
-        btnLoadRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectImage(SELECT_PHOTO_RIGHT);
+                Log.v("ShowImages", "Building " + seekBar.getProgress() + " frames...");
             }
         });
 
@@ -178,9 +173,15 @@ public class ShowImages extends AppCompatActivity {
                 }
 
             } else if ((requestCode & PICK_CAMERA) == PICK_CAMERA) {
+                String target;
+                if ((requestCode & SELECT_PHOTO_LEFT) == SELECT_PHOTO_LEFT) {
+                    target = "tempLeft.jpg";
+                } else {
+                    target = "tempRight.jpg";
+                }
                 File f = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString());
                 for (File temp : f.listFiles()) {
-                    if (temp.getName().equals("temp.jpg")) {
+                    if (temp.getName().equals(target)) {
                         f = temp;
                         break;
                     }

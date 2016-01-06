@@ -64,23 +64,26 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top|left|center_horizontal|right"
             android:gravity="top|start|end"
-            android:weightSum="2">
+            android:weightSum="4">
+
+            <SeekBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBar"
+                android:layout_weight="3"
+                android:layout_gravity="center"
+                android:max="100"
+                android:progress="10" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/edit_load_left"
-                android:id="@+id/btnLoadLeft"
+                android:text="@string/edit_btnBuild"
+                android:id="@+id/btnBuild"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_gravity="center" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/edit_load_right"
-                android:id="@+id/btnLoadRight"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_weight="1" />
         </LinearLayout>
     </FrameLayout>
 
