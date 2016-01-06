@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Image Tester</string>
+    <string name="edit_load_left">Load Left Image</string>
+    <string name="edit_load_right">Load Right Image</string>
+    <string name="edit_imgLeft_desc">The source image to morph from.</string>
+    <string name="edit_imgRight_desc">The destination image to morph to.</string>
+    <string name="edit_imgEdit_desc">Image to draw upon.</string>
+</resources>
