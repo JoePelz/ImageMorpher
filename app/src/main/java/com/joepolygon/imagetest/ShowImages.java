@@ -35,7 +35,7 @@ public class ShowImages extends AppCompatActivity {
     private SeekBar seekBar;
     private ImageView imgLeft;
     private ImageView imgRight;
-    private ImageView imgEdit;
+    private EditView  imgEdit;
 
     private Project model;
 
@@ -50,7 +50,7 @@ public class ShowImages extends AppCompatActivity {
         btnBuild = (Button)    findViewById(R.id.btnBuild);
         imgLeft  = (ImageView) findViewById(R.id.imgLeft);
         imgRight = (ImageView) findViewById(R.id.imgRight);
-        imgEdit  = (ImageView) findViewById(R.id.imgEdit);
+        imgEdit  = (EditView) findViewById(R.id.imgEdit);
 
         model = new Project();
 

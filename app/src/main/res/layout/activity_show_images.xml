@@ -46,10 +46,11 @@
         android:layout_height="0dp"
         android:layout_weight="8">
 
-        <ImageView
+        <com.joepolygon.imagetest.EditView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/imgEdit"
+            android:layout_gravity="center"
             android:contentDescription="@string/edit_imgEdit_desc" />
     </FrameLayout>
 
@@ -68,7 +69,7 @@
 
             <SeekBar
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:id="@+id/seekBar"
                 android:layout_weight="3"
                 android:layout_gravity="center"
