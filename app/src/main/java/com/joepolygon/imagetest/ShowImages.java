@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -22,7 +21,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 public class ShowImages extends AppCompatActivity {
     private final static int SELECT_PHOTO_LEFT = 0x10;
@@ -52,24 +50,10 @@ public class ShowImages extends AppCompatActivity {
         imgRight = (ImageView) findViewById(R.id.imgRight);
         imgEdit  = (EditView) findViewById(R.id.imgEdit);
 
-        model = new Project();
+        model = new Project(this);
 
-        if (savedInstanceState != null) {
-            InputStream inputStream;
-            Bitmap image;
-            Uri imageUri = savedInstanceState.getParcelable("LeftURI");
-            if (imageUri != null) {
-                setLeftImage(imageUri);
-            }
-            imageUri = savedInstanceState.getParcelable("RightURI");
-            if (imageUri != null) {
-                setRightImage(imageUri);
-            }
-            imageUri = savedInstanceState.getParcelable("Selected");
-            if (imageUri != null) {
-                setEditImage(imageUri);
-            }
-        }
+        model.loadState(savedInstanceState);
+        updateImages();
 
         btnBuild.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,80 +65,48 @@ public class ShowImages extends AppCompatActivity {
         imgLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!model.isLeftLoaded()) {
-                    Log.v("ShowImages", "Left is NOT loaded");
+                if (!model.isLeftLoaded() || model.getEditImage() == Project.IMG_LEFT) {
                     selectImage(SELECT_PHOTO_LEFT);
                 } else {
-                    if (model.getEditImage().equals(model.getLeft())) {
-                        Log.v("ShowImages", "Left: getEditImage == getLeft");
-                        selectImage(SELECT_PHOTO_LEFT);
-                    } else {
-                        Log.v("ShowImages", "Left: getEditImage != getLeft");
-                        setEditImage(model.getLeft());
-                    }
+                    model.setEditImage(Project.IMG_LEFT);
                 }
+                updateImages();
             }
         });
 
         imgRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!model.isRightLoaded() || model.getEditImage().equals(model.getRight())) {
+                if (!model.isRightLoaded() || model.getEditImage() == Project.IMG_RIGHT) {
                     selectImage(SELECT_PHOTO_RIGHT);
                 } else {
-                    setEditImage(model.getRight());
+                    model.setEditImage(Project.IMG_RIGHT);
                 }
+                updateImages();
             }
         });
     }
 
-    private void setLeftImage(Uri imageUri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            Bitmap image = BitmapFactory.decodeStream(inputStream);
+
+    private void updateImages() {
+        Bitmap image;
+        image = model.getImage(Project.IMG_LEFT) ;
+        if (image != null) {
             imgLeft.setImageBitmap(image);
-            model.setLeft(imageUri);
             model.setLeftLoaded(true);
-            setEditImage(imageUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Unable to open left image", Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void setRightImage(Uri imageUri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            Bitmap image = BitmapFactory.decodeStream(inputStream);
+        image = model.getImage(Project.IMG_RIGHT);
+        if (image != null) {
             imgRight.setImageBitmap(image);
-            model.setRight(imageUri);
             model.setRightLoaded(true);
-            setEditImage(imageUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Unable to open right image", Toast.LENGTH_LONG).show();
         }
-    }
 
-    private void setEditImage(Uri imageUri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            Bitmap image = BitmapFactory.decodeStream(inputStream);
-            imgEdit.setImageBitmap(image);
-            model.setEditImage(imageUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Unable to open image to edit", Toast.LENGTH_LONG).show();
-        }
+        imgEdit.setImageBitmap(model.getImage(model.getEditImage()));
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (model != null) {
-            outState.putParcelable("LeftURI", model.getLeft());
-            outState.putParcelable("RightURI", model.getRight());
-            outState.putParcelable("Selected", model.getEditImage());
-        }
+        model.saveState(outState);
     }
 
     @Override
@@ -167,10 +119,23 @@ public class ShowImages extends AppCompatActivity {
                 Uri imageUri = data.getData();
 
                 if ((requestCode & SELECT_PHOTO_LEFT) == SELECT_PHOTO_LEFT) {
-                    setLeftImage(imageUri);
+                    try {
+                        model.setLeft(imageUri);
+                        model.setEditImage(Project.IMG_LEFT);
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
                 } else {
-                    setRightImage(imageUri);
+                    try {
+                        model.setRight(imageUri);
+                        model.setEditImage(Project.IMG_RIGHT);
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
                 }
+                updateImages();
 
             } else if ((requestCode & PICK_CAMERA) == PICK_CAMERA) {
                 String target;
@@ -179,7 +144,11 @@ public class ShowImages extends AppCompatActivity {
                 } else {
                     target = "tempRight.jpg";
                 }
-                File f = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString());
+                File f = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                if (f == null) {
+                    Toast.makeText(this, "Couldn't open file system", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 for (File temp : f.listFiles()) {
                     if (temp.getName().equals(target)) {
                         f = temp;
@@ -189,10 +158,23 @@ public class ShowImages extends AppCompatActivity {
 
                 Uri imageUri = Uri.fromFile(f);
                 if ((requestCode & SELECT_PHOTO_LEFT) == SELECT_PHOTO_LEFT) {
-                    setLeftImage(imageUri);
+                    try {
+                        model.setLeft(imageUri);
+                        model.setEditImage(Project.IMG_LEFT);
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
                 } else {
-                    setRightImage(imageUri);
+                    try {
+                        model.setRight(imageUri);
+                        model.setEditImage(Project.IMG_RIGHT);
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
                 }
+                updateImages();
             }
         }
     }
@@ -213,7 +195,7 @@ public class ShowImages extends AppCompatActivity {
                     }
 
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    File f = null;
+                    File f;
                     if (origin == SELECT_PHOTO_LEFT) {
                         f = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "tempLeft.jpg");
                     } else {
