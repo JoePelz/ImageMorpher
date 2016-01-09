@@ -14,23 +14,22 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 /**
  * Created by Joe on 2016-01-07.
  * Intended to display an image and allow the user to draw upon it.
  */
 public class EditView extends ImageView {
-    //drawing and canvas paint
-    private Paint drawPaint1, drawPaint2;
-    //initial color  (A R G B)?
-    private static final int paintColor1 = 0xFF660000;
-    private static final int paintColor2 = 0xFF00FF00;
     //background image
     private Bitmap bgBitmap;
     // matrix used to translate 0-1 to image coordinates
     private Matrix drawMatrix;
     private float[] matValues;
 
-    private Line permaLine;
+    private ArrayList<Line> controlLines;
+    private Line selectedLine;
+    private int  selectedVertex;
     private Line tempLine;
     private float startx, starty;
 
@@ -41,16 +40,9 @@ public class EditView extends ImageView {
 
     private void setupDrawing(){
         matValues = new float[9];
-    //get drawing area setup for interaction
-        drawPaint1 = new Paint();
-        drawPaint1.setColor(paintColor1);
-        drawPaint1.setStrokeWidth(5.0f);
-        drawPaint2 = new Paint();
-        drawPaint2.setColor(paintColor2);
-        drawPaint2.setStrokeWidth(1.0f);
-
-        tempLine = new Line(new PointF(0.2f, 0.2f), new PointF(0.8f, 0.8f));
-        tempLine.setB(new PointF(0.2f, 0.8f));
+        controlLines = new ArrayList<Line>();
+        // vertical test line.
+        // controlLines.add(new Line(0.5f, 0.2f, 0.5f, 0.8f));
     }
 
     /*
@@ -95,8 +87,11 @@ public class EditView extends ImageView {
     @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
-        if (permaLine != null) {
-            permaLine.drawNice(c, drawMatrix);
+        if (selectedLine != null) {
+            selectedLine.drawSelected(c, drawMatrix);
+        }
+        for (Line l : controlLines) {
+            l.drawNice(c, drawMatrix);
         }
         if (tempLine != null) {
             tempLine.drawErasable(c, drawMatrix);
@@ -106,21 +101,42 @@ public class EditView extends ImageView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        final float threshhold = 0.06f;
+        float closestDist = threshhold + 1;
+        Line closestLine = null;
+
         switch(event.getActionMasked()) {
             /* Action down should first
              * Check if an existing vertex or line is within range
              *     if so, select that line, and save which vertex is being edited.
-             * Otherwise, clear vertex being edited
+             * Otherwise, clear vertex being edited / selection
              *     and begin a new tempLine, saving startx/y
              */
             case MotionEvent.ACTION_DOWN:
                 startx = (event.getX() - matValues[2]) / getHeight();
                 starty = (event.getY() - matValues[5]) / getHeight();
-                tempLine = new Line(
-                        startx,
-                        starty,
-                        startx,
-                        starty);
+                if (!controlLines.isEmpty()) {
+                    float tempDist;
+                    for (Line l : controlLines) {
+                        tempDist = Math.abs(l.distanceFromLine(startx, starty));
+                        if (tempDist < closestDist) {
+                            closestDist = tempDist;
+                            closestLine = l;
+                        }
+                    }
+                }
+                if (closestDist < threshhold) {
+                    selectedLine = closestLine;
+                    selectedVertex = closestLine.getClosestVertex(startx, starty);
+                    tempLine = null;
+                } else {
+                    selectedLine = null;
+                    tempLine = new Line(
+                            startx,
+                            starty,
+                            startx,
+                            starty);
+                }
                 invalidate();
                 break;
 
@@ -130,11 +146,23 @@ public class EditView extends ImageView {
              *     recreate templine with a new endpoint.
              */
             case MotionEvent.ACTION_MOVE:
-                tempLine = new Line(
-                        startx,
-                        starty,
-                        (event.getX() - matValues[2]) / getHeight(),
-                        (event.getY() - matValues[5]) / getHeight());
+                if (selectedLine == null) {
+                    tempLine = new Line(
+                            startx,
+                            starty,
+                            (event.getX() - matValues[2]) / getHeight(),
+                            (event.getY() - matValues[5]) / getHeight());
+                } else {
+                    if (selectedVertex == Line.P0) {
+                        selectedLine.setP0(
+                                (event.getX() - matValues[2]) / getHeight(),
+                                (event.getY() - matValues[5]) / getHeight());
+                    } else if (selectedVertex == Line.P1) {
+                        selectedLine.setP1(
+                                (event.getX() - matValues[2]) / getHeight(),
+                                (event.getY() - matValues[5]) / getHeight());
+                    }
+                }
                 invalidate();
                 break;
             /* Action up should
@@ -142,9 +170,12 @@ public class EditView extends ImageView {
              *     and the new permanent line selected.
              */
             case MotionEvent.ACTION_UP:
-                permaLine = tempLine;
-                tempLine = null;
-                invalidate();
+                if (tempLine != null) {
+                    controlLines.add(tempLine);
+                    selectedLine = tempLine;
+                    tempLine = null;
+                    invalidate();
+                }
                 break;
             default:
                 break;
