@@ -3,6 +3,7 @@ package com.joepolygon.imagetest;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -27,11 +28,14 @@ public class EditView extends ImageView {
     private Canvas drawCanvas;
     //background image
     private Bitmap bgBitmap;
-    // matrix used to display the bgBitmap
-    private Matrix imageMatrix;
-    float[] matValues;
+    // matrix used to translate 0-1 to image coordinates
+    private Matrix drawMatrix;
+    private float[] matValues;
 
     private Point touchSpot;
+    private Line permaLine;
+    private Line tempLine;
+    private float startx, starty;
 
     public EditView(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -48,6 +52,9 @@ public class EditView extends ImageView {
         drawPaint2 = new Paint();
         drawPaint2.setColor(paintColor2);
         drawPaint2.setStrokeWidth(1.0f);
+
+        tempLine = new Line(new PointF(0.2f, 0.2f), new PointF(0.8f, 0.8f));
+        tempLine.setB(new PointF(0.2f, 0.8f));
     }
 
     /*
@@ -75,10 +82,16 @@ public class EditView extends ImageView {
         }
         bgBitmap = bm;
         super.setImageBitmap(bgBitmap);
-        imageMatrix = new Matrix();
-        //getImageMatrix().invert(imageMatrix);
-        imageMatrix = getImageMatrix();
-        imageMatrix.getValues(matValues);
+
+        drawMatrix = getImageMatrix();
+        drawMatrix.getValues(matValues);
+
+        drawMatrix = new Matrix();
+        //scale to fit window
+        drawMatrix.setScale(1100, 1100);
+        //match offset
+        drawMatrix.postTranslate(matValues[2], matValues[5]);
+
         Log.v("EditView", "getImageMatrix() -> " + getImageMatrix());
         Log.v("EditView", "Image resolution -> " + bgBitmap.getWidth() + " * " + bgBitmap.getHeight());
     }
@@ -86,27 +99,60 @@ public class EditView extends ImageView {
     @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
-        //getImageMatrix will give the matrix used to display the image
-        c.drawText("Touch: (" + touchSpot.x + ", " + touchSpot.y + ")", 5, 20, drawPaint2);
-        c.drawLine(0, 0, c.getWidth(), c.getHeight(), drawPaint1);
+        if (permaLine != null) {
+            permaLine.drawNice(c, drawMatrix);
+        }
+        if (tempLine != null) {
+            tempLine.drawErasable(c, drawMatrix);
+        }
     }
 
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch(event.getActionMasked()) {
+            /* Action down should first
+             * Check if an existing vertex or line is within range
+             *     if so, select that line, and save which vertex is being edited.
+             * Otherwise, clear vertex being edited
+             *     and begin a new tempLine, saving startx/y
+             */
             case MotionEvent.ACTION_DOWN:
+                startx = (event.getX() - matValues[2]) / getHeight();
+                starty = (event.getY() - matValues[5]) / getHeight();
+                tempLine = new Line(
+                        startx,
+                        starty,
+                        startx,
+                        starty);
+                invalidate();
+                break;
+
+            /* Action move should
+             * if selection is set, move saved vertex
+             * else if tempLine exists,
+             *     recreate templine with a new endpoint.
+             */
             case MotionEvent.ACTION_MOVE:
+                tempLine = new Line(
+                        startx,
+                        starty,
+                        (event.getX() - matValues[2]) / getHeight(),
+                        (event.getY() - matValues[5]) / getHeight());
+                invalidate();
+                break;
+            /* Action up should
+             * if tempLine is not null, it should be saved to the line collection.
+             *     and the new permanent line selected.
+             */
             case MotionEvent.ACTION_UP:
-                touchSpot.x = (int)((event.getX() - matValues[2]) / getHeight()*100);
-                touchSpot.y = (int)((event.getY() - matValues[5]) / getHeight()*100);
+                permaLine = tempLine;
+                tempLine = null;
+                invalidate();
                 break;
             default:
                 break;
         }
-        //Canvas c
-
-        invalidate(0,0,300,100);
         return true;
     }
 }
