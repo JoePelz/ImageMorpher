@@ -31,8 +31,8 @@ public class ShowImages extends AppCompatActivity {
 
     private Button btnBuild;
     private SeekBar seekBar;
-    private ImageView imgLeft;
-    private ImageView imgRight;
+    private Thumbnail imgLeft;
+    private Thumbnail imgRight;
     private EditView  imgEdit;
 
     private Project model;
@@ -46,13 +46,21 @@ public class ShowImages extends AppCompatActivity {
 
         seekBar  = (SeekBar)   findViewById(R.id.seekBar);
         btnBuild = (Button)    findViewById(R.id.btnBuild);
-        imgLeft  = (ImageView) findViewById(R.id.imgLeft);
-        imgRight = (ImageView) findViewById(R.id.imgRight);
+        imgLeft  = (Thumbnail) findViewById(R.id.imgLeft);
+        imgLeft.setRole(Project.IMG_LEFT);
+        imgRight = (Thumbnail) findViewById(R.id.imgRight);
+        imgRight.setRole(Project.IMG_RIGHT);
         imgEdit  = (EditView) findViewById(R.id.imgEdit);
 
         model = new Project(this);
+        imgEdit.setModel(model);
+        imgLeft.setModel(model);
+        imgRight.setModel(model);
+        model.addUpdateListener(imgLeft);
+        model.addUpdateListener(imgRight);
 
         model.loadState(savedInstanceState);
+
         updateImages();
 
         btnBuild.setOnClickListener(new View.OnClickListener() {
@@ -89,19 +97,9 @@ public class ShowImages extends AppCompatActivity {
 
 
     private void updateImages() {
-        Bitmap image;
-        image = model.getImage(Project.IMG_LEFT) ;
-        if (image != null) {
-            imgLeft.setImageBitmap(image);
-            model.setLeftLoaded(true);
-        }
-        image = model.getImage(Project.IMG_RIGHT);
-        if (image != null) {
-            imgRight.setImageBitmap(image);
-            model.setRightLoaded(true);
-        }
-
-        imgEdit.setImageBitmap(model.getImage(model.getEditImage()));
+        imgRight.updateImage();
+        imgLeft.updateImage();
+        imgEdit.updateImage();
     }
 
     @Override

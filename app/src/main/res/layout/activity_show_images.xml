@@ -22,7 +22,7 @@
             android:weightSum="2"
             android:minHeight="200dp">
 
-            <ImageView
+            <com.joepolygon.imagetest.Thumbnail
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/imgLeft"
@@ -30,7 +30,7 @@
                 android:contentDescription="@string/edit_imgLeft_desc"
                 android:clickable="true" />
 
-            <ImageView
+            <com.joepolygon.imagetest.Thumbnail
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/imgRight"

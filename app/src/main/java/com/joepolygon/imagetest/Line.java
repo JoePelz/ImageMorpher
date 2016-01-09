@@ -8,15 +8,18 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.Log;
 
+import java.io.Serializable;
+
 /**
  * Created by Joe on 2016-01-08.
  */
-class Line {
+class Line implements Serializable{
     public static final int P0 = 0;
     public static final int P1 = 1;
-    private static final Paint paintErasable = new Paint();
-    private static final Paint paintNice = new Paint();
-    private static final Paint paintSelected = new Paint();
+    public static final Paint paintErasable = new Paint();
+    public static final Paint paintNice = new Paint();
+    public static final Paint paintSelected = new Paint();
+    public static final Paint paintThin = new Paint();
     static {
         paintErasable.setStrokeWidth(5);
         paintErasable.setAntiAlias(false);
@@ -32,6 +35,11 @@ class Line {
         paintSelected.setAntiAlias(true);
         paintSelected.setColor(0xFF0000FF);
         paintSelected.setStyle(Paint.Style.STROKE);
+
+        paintThin.setStrokeWidth(0);
+        paintThin.setAntiAlias(true);
+        paintThin.setColor(0xFFFFFFFF);
+        paintThin.setStyle(Paint.Style.FILL_AND_STROKE);
     }
 
     private float[] pts;
@@ -97,7 +105,7 @@ class Line {
 
     public float dotProduct(Line op) {
         float[] temp = op.getPts();
-        return pts[2] * temp[2] + pts[3] * temp[3];
+        return (pts[2] - pts[0]) * temp[2] + (pts[3] - pts[1]) * temp[3];
     }
 
     public float length() {
@@ -123,20 +131,7 @@ class Line {
         return (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0);
     }
 
-    //TODO: make draw modes to be options when invoking draw(...);
-    public void drawErasable(Canvas c, Matrix m) {
-        draw(c, m, paintErasable);
-    }
-
-    public void drawNice(Canvas c, Matrix m) {
-        draw(c, m, paintNice);
-    }
-
-    public void drawSelected(Canvas c, Matrix m) {
-        draw(c, m, paintSelected);
-    }
-
-    private void draw(Canvas c, Matrix m, Paint p) {
+    public void draw(Canvas c, Matrix m, Paint p) {
         if (c == null || m == null) {
             return;
         }
@@ -152,5 +147,9 @@ class Line {
     @Override
     public String toString() {
         return String.format("Line: (%.3f,%.3f) to (%.3f,%.3f)", pts[0], pts[1], pts[2], pts[3]);
+    }
+
+    public Line copy() {
+        return new Line(pts[0], pts[1], pts[2], pts[3]);
     }
 }

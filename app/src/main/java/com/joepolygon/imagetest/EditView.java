@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.media.ThumbnailUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -12,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -23,12 +25,12 @@ import java.util.ArrayList;
 public class EditView extends ImageView {
     //background image
     private Bitmap bgBitmap;
+    private Bitmap bgBackup;
     // matrix used to translate 0-1 to image coordinates
     private Matrix drawMatrix;
     private float[] matValues;
+    private Project model;
 
-    private ArrayList<Line> controlLines;
-    private Line selectedLine;
     private int  selectedVertex;
     private Line tempLine;
     private float startx, starty;
@@ -36,39 +38,31 @@ public class EditView extends ImageView {
     public EditView(Context context, AttributeSet attrs){
         super(context, attrs);
         setupDrawing();
+        addOnLayoutChangeListener(new OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                //Log.v("Thumbnail", "new layout: " + left + "," + top + "," + right + ", " + bottom);
+                updateDimensions(Math.min(right - left, bottom - top));
+            }
+        });
     }
 
     private void setupDrawing(){
         matValues = new float[9];
-        controlLines = new ArrayList<Line>();
-        // vertical test line.
-        // controlLines.add(new Line(0.5f, 0.2f, 0.5f, 0.8f));
     }
 
-    /*
-    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(Math.min(scaleWidth, scaleHeight), Math.min(scaleWidth, scaleHeight));
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        return resizedBitmap;
+    public void setModel(Project model) {
+        this.model = model;
     }
-    */
 
-    @Override
-    public void setImageBitmap(Bitmap bm) {
-        if (bm == null) {
+    public void updateDimensions(int size) {
+        if (bgBackup == null) {
             return;
         }
-        bgBitmap = bm;
+        if (bgBitmap != bgBackup) {
+            bgBitmap.recycle();
+        }
+        bgBitmap = ThumbnailUtils.extractThumbnail(bgBackup, size, size);
         super.setImageBitmap(bgBitmap);
 
         drawMatrix = getImageMatrix();
@@ -76,25 +70,45 @@ public class EditView extends ImageView {
 
         drawMatrix = new Matrix();
         //scale to fit window
-        drawMatrix.setScale(1100, 1100);
+        drawMatrix.setScale(size, size);
+        //match offset
+        drawMatrix.postTranslate(matValues[2], matValues[5]);
+    }
+
+    public void updateImage() {
+        bgBackup = model.getImage(Project.IMG_EDIT);
+        if (bgBackup == null) {
+            bgBitmap = null;
+            return;
+        }
+        bgBitmap = bgBackup;
+        super.setImageBitmap(bgBitmap);
+
+        drawMatrix = getImageMatrix();
+        drawMatrix.getValues(matValues);
+
+        drawMatrix = new Matrix();
+        //scale to fit window
+        drawMatrix.setScale(getHeight(), getHeight());
         //match offset
         drawMatrix.postTranslate(matValues[2], matValues[5]);
 
-        Log.v("EditView", "getImageMatrix() -> " + getImageMatrix());
-        Log.v("EditView", "Image resolution -> " + bgBitmap.getWidth() + " * " + bgBitmap.getHeight());
+        //Log.v("EditView", "Scaled to " + getHeight());
+        //Log.v("EditView", "getImageMatrix() -> " + getImageMatrix());
+        //Log.v("EditView", "Image resolution -> " + bgBitmap.getWidth() + " * " + bgBitmap.getHeight());
     }
 
     @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
-        if (selectedLine != null) {
-            selectedLine.drawSelected(c, drawMatrix);
-        }
-        for (Line l : controlLines) {
-            l.drawNice(c, drawMatrix);
+        if (model.getSelectedLine() != null)
+            model.getSelectedLine().draw(c, drawMatrix, Line.paintSelected);
+
+        for (Line l : model.getLines()) {
+            l.draw(c, drawMatrix, Line.paintNice);
         }
         if (tempLine != null) {
-            tempLine.drawErasable(c, drawMatrix);
+            tempLine.draw(c, drawMatrix, Line.paintErasable);
         }
     }
 
@@ -104,6 +118,7 @@ public class EditView extends ImageView {
         final float threshhold = 0.06f;
         float closestDist = threshhold + 1;
         Line closestLine = null;
+        float tempx, tempy;
 
         switch(event.getActionMasked()) {
             /* Action down should first
@@ -115,9 +130,13 @@ public class EditView extends ImageView {
             case MotionEvent.ACTION_DOWN:
                 startx = (event.getX() - matValues[2]) / getHeight();
                 starty = (event.getY() - matValues[5]) / getHeight();
-                if (!controlLines.isEmpty()) {
+                //if clicking outside the image, abort.
+                if (startx < 0 || startx > 1 || starty < 0 || starty > 1) {
+                    break;
+                }
+                if (!model.getLines().isEmpty()) {
                     float tempDist;
-                    for (Line l : controlLines) {
+                    for (Line l : model.getLines()) {
                         tempDist = Math.abs(l.distanceFromLine(startx, starty));
                         if (tempDist < closestDist) {
                             closestDist = tempDist;
@@ -126,11 +145,11 @@ public class EditView extends ImageView {
                     }
                 }
                 if (closestDist < threshhold) {
-                    selectedLine = closestLine;
+                    model.selectLine(closestLine);
                     selectedVertex = closestLine.getClosestVertex(startx, starty);
                     tempLine = null;
                 } else {
-                    selectedLine = null;
+                    model.selectLine(null);
                     tempLine = new Line(
                             startx,
                             starty,
@@ -146,21 +165,23 @@ public class EditView extends ImageView {
              *     recreate templine with a new endpoint.
              */
             case MotionEvent.ACTION_MOVE:
-                if (selectedLine == null) {
-                    tempLine = new Line(
-                            startx,
-                            starty,
-                            (event.getX() - matValues[2]) / getHeight(),
-                            (event.getY() - matValues[5]) / getHeight());
+                tempx = (event.getX() - matValues[2]) / getHeight();
+                tempy = (event.getY() - matValues[5]) / getHeight();
+                if (model.getSelectedLine() == null) {
+                    if (tempx < 0 || tempx > 1 || tempy < 0 || tempy > 1) {
+                        tempLine = null;
+                    } else if (tempLine != null) {
+                        tempLine = new Line(startx, starty, tempx, tempy);
+                    }
                 } else {
-                    if (selectedVertex == Line.P0) {
-                        selectedLine.setP0(
-                                (event.getX() - matValues[2]) / getHeight(),
-                                (event.getY() - matValues[5]) / getHeight());
-                    } else if (selectedVertex == Line.P1) {
-                        selectedLine.setP1(
-                                (event.getX() - matValues[2]) / getHeight(),
-                                (event.getY() - matValues[5]) / getHeight());
+                    if (tempx < 0 || tempx > 1 || tempy < 0 || tempy > 1) {
+                        model.removeSelected();
+                    } else {
+                        if (selectedVertex == Line.P0) {
+                            model.getSelectedLine().setP0(tempx, tempy);
+                        } else if (selectedVertex == Line.P1) {
+                            model.getSelectedLine().setP1(tempx, tempy);
+                        }
                     }
                 }
                 invalidate();
@@ -171,10 +192,11 @@ public class EditView extends ImageView {
              */
             case MotionEvent.ACTION_UP:
                 if (tempLine != null) {
-                    controlLines.add(tempLine);
-                    selectedLine = tempLine;
+                    model.addLine(tempLine);
                     tempLine = null;
                     invalidate();
+                } else {
+                    model.fireUpdate();
                 }
                 break;
             default:
