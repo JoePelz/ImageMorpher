@@ -22,17 +22,14 @@ public class EditView extends ImageView {
     //drawing and canvas paint
     private Paint drawPaint1, drawPaint2;
     //initial color  (A R G B)?
-    private int paintColor1 = 0xFF660000;
-    private int paintColor2 = 0xFF00FF00;
-    //canvas
-    private Canvas drawCanvas;
+    private static final int paintColor1 = 0xFF660000;
+    private static final int paintColor2 = 0xFF00FF00;
     //background image
     private Bitmap bgBitmap;
     // matrix used to translate 0-1 to image coordinates
     private Matrix drawMatrix;
     private float[] matValues;
 
-    private Point touchSpot;
     private Line permaLine;
     private Line tempLine;
     private float startx, starty;
@@ -43,7 +40,6 @@ public class EditView extends ImageView {
     }
 
     private void setupDrawing(){
-        touchSpot = new Point();
         matValues = new float[9];
     //get drawing area setup for interaction
         drawPaint1 = new Paint();

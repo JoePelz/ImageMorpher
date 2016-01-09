@@ -28,7 +28,7 @@ public class Project {
     private int     imgToEdit;
     private boolean isLeftLoaded;
     private boolean isRightLoaded;
-    private Context appContext;
+    private final Context appContext;
 
     //Lines for manipulating images
 
@@ -87,13 +87,13 @@ public class Project {
         }
     }
 
-    public int minSide(Bitmap srcBmp) {
+    private int minSide(Bitmap srcBmp) {
         return (srcBmp.getWidth() <= srcBmp.getHeight()) ? srcBmp.getWidth() : srcBmp.getHeight();
     }
 
-    public boolean loadState(Bundle map) {
+    public void loadState(Bundle map) {
         if (map == null) {
-            return false;
+            return;
         }
         leftImageUri = map.getParcelable("imgLeftUri");
         rightImageUri = map.getParcelable("imgRightUri");
@@ -115,7 +115,6 @@ public class Project {
             }
         }
         imgToEdit = map.getInt("imgEdit");
-        return true;
     }
 
     public void saveState(Bundle map) {

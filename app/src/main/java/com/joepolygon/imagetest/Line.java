@@ -12,11 +12,11 @@ import android.util.Log;
 /**
  * Created by Joe on 2016-01-08.
  */
-public class Line {
+class Line {
     private static final Paint paintErasable = new Paint();
     private static final Paint paintNice = new Paint();
     private static final Paint paintSelected = new Paint();
-    {
+    static {
         paintErasable.setStrokeWidth(5);
         paintErasable.setAntiAlias(false);
         paintErasable.setColor(0xFFFFFFFF);

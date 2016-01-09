@@ -216,7 +216,6 @@ public class ShowImages extends AppCompatActivity {
         builder.show();
     }
 
-    @NonNull
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == MY_REQUEST_CODE) {
