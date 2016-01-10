@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context="com.joepolygon.imagetest.ShowImages"
     android:orientation="vertical"
-    android:weightSum="12">
+    android:weightSum="14">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -28,7 +28,8 @@
                 android:id="@+id/imgLeft"
                 android:layout_weight="1"
                 android:contentDescription="@string/edit_imgLeft_desc"
-                android:clickable="true" />
+                android:clickable="true"
+                android:src="@drawable/test" />
 
             <com.joepolygon.imagetest.Thumbnail
                 android:layout_width="match_parent"
@@ -37,14 +38,15 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/edit_imgRight_desc"
                 android:contextClickable="false"
-                android:clickable="true" />
+                android:clickable="true"
+                android:src="@drawable/test" />
         </LinearLayout>
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8">
+        android:layout_weight="11">
 
         <com.joepolygon.imagetest.EditView
             android:layout_width="match_parent"
@@ -54,38 +56,47 @@
             android:contentDescription="@string/edit_imgEdit_desc" />
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left|center_horizontal|right"
+        android:gravity="top|start|end"
+        android:weightSum="40"
         android:layout_weight="1">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+        <Button
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|left|center_horizontal|right"
-            android:gravity="top|start|end"
-            android:weightSum="4">
+            android:text="@string/edit_btnSave"
+            android:id="@+id/btnSave"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="center" />
 
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:id="@+id/seekBar"
-                android:layout_weight="3"
-                android:layout_gravity="center"
-                android:max="100"
-                android:progress="10" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_btnOpen"
+            android:id="@+id/btnOpen"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="center" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/edit_btnBuild"
-                android:id="@+id/btnBuild"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_weight="1"
-                android:layout_gravity="center" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_btnBuild"
+            android:id="@+id/btnBuild"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="center" />
 
-        </LinearLayout>
-    </FrameLayout>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/seekBar"
+            android:layout_gravity="center"
+            android:max="100"
+            android:progress="10" />
+
+    </LinearLayout>
 
 </LinearLayout>

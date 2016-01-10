@@ -9,7 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -174,9 +178,11 @@ public class Project {
     }
 
     public void loadState(Bundle map) {
+        String temp;
         if (map == null) {
             return;
         }
+
         leftImageUri = map.getParcelable("imgLeftUri");
         rightImageUri = map.getParcelable("imgRightUri");
 
@@ -192,7 +198,7 @@ public class Project {
             try {
                 setRight(rightImageUri);
             } catch (FileNotFoundException e) {
-                Log.e("Project", "Load State: cannot load left image.");
+                Log.e("Project", "Load State: cannot load right image.");
                 e.printStackTrace();
             }
         }
@@ -210,5 +216,56 @@ public class Project {
         map.putSerializable("controlLinesLeft", leftLines);
         map.putSerializable("controlLinesRight", rightLines);
     }
+    public void saveToFile(ObjectOutputStream os) {
+        SaveObject data = new SaveObject();
+        data.leftUriEncoded = leftImageUri.toString();
+        data.rightUriEncoded = rightImageUri.toString();
+        data.imgEdit = imgToEdit;
+        data.selection = selectedLineIndex;
+        data.lLines = leftLines;
+        data.rLines = rightLines;
+        try {
+            os.writeObject(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean loadFromFile(ObjectInputStream is) {
+        SaveObject data = null;
+        try {
+            data = (SaveObject) is.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (data == null) {
+            return false;
+        }
+        leftImageUri = Uri.parse(data.leftUriEncoded);
+        rightImageUri = Uri.parse(data.rightUriEncoded);
 
+        if (leftImageUri != null) {
+            try {
+                setLeft(leftImageUri);
+            } catch (FileNotFoundException e) {
+                Log.e("Project", "Load From File: cannot load left image.");
+                e.printStackTrace();
+            }
+        }
+        if (rightImageUri != null) {
+            try {
+                setRight(rightImageUri);
+            } catch (FileNotFoundException e) {
+                Log.e("Project", "Load From File: cannot load right image.");
+                e.printStackTrace();
+            }
+        }
+
+        selectedLineIndex = data.selection;
+        imgToEdit = data.imgEdit;
+        leftLines = data.lLines;
+        rightLines = data.rLines;
+        return true;
+    }
 }

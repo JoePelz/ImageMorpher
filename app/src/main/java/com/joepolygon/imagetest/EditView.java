@@ -101,6 +101,9 @@ public class EditView extends ImageView {
     @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
+        if (model == null) {
+            return;
+        }
         if (model.getSelectedLine() != null)
             model.getSelectedLine().draw(c, drawMatrix, Line.paintSelected);
 

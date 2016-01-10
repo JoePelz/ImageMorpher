@@ -5,22 +5,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class ShowImages extends AppCompatActivity {
     private final static int SELECT_PHOTO_LEFT = 0x10;
@@ -29,7 +31,6 @@ public class ShowImages extends AppCompatActivity {
     private final static int PICK_GALLERY = 0x2;
     private final static int MY_REQUEST_CODE = 0x1;
 
-    private Button btnBuild;
     private SeekBar seekBar;
     private Thumbnail imgLeft;
     private Thumbnail imgRight;
@@ -44,8 +45,10 @@ public class ShowImages extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_images);
 
+        Button btnBuild = (Button) findViewById(R.id.btnBuild);
+        Button btnSave = (Button)  findViewById(R.id.btnSave);
+        Button btnOpen = (Button)  findViewById(R.id.btnOpen);
         seekBar  = (SeekBar)   findViewById(R.id.seekBar);
-        btnBuild = (Button)    findViewById(R.id.btnBuild);
         imgLeft  = (Thumbnail) findViewById(R.id.imgLeft);
         imgLeft.setRole(Project.IMG_LEFT);
         imgRight = (Thumbnail) findViewById(R.id.imgRight);
@@ -93,8 +96,46 @@ public class ShowImages extends AppCompatActivity {
                 updateImages();
             }
         });
+
+        btnSave.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //doStuff...
+                actionSave();
+            }
+        });
+        btnOpen.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                actionOpen();
+            }
+        });
     }
 
+    private void actionSave() {
+        //save the current Project object to a file.
+        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
+        try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(f))) {
+            model.saveToFile(os);
+            Toast.makeText(this, "File saved, I think!", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Log.e("ShowImages", "actionSave (writeObject?) ran into IOException. " + e.getMessage());
+        }
+    }
+
+    private void actionOpen() {
+        //replace the current Project object.
+        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
+        try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
+            if (model.loadFromFile(is)) {
+                Toast.makeText(this, "Project opened successfully. Maybe.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Could not open project. Sorry!", Toast.LENGTH_LONG).show();
+            }
+        } catch (IOException e) {
+            Log.e("ShowImages", "actionSave (writeObject?) ran into IOException. " + e.getMessage());
+        }
+    }
 
     private void updateImages() {
         imgRight.updateImage();

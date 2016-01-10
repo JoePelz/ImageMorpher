@@ -4,4 +4,6 @@
     <string name="edit_imgLeft_desc">The source image to morph from.</string>
     <string name="edit_imgRight_desc">The destination image to morph to.</string>
     <string name="edit_imgEdit_desc">Image to draw upon.</string>
+    <string name="edit_btnSave">Save</string>
+    <string name="edit_btnOpen">Open</string>
 </resources>
