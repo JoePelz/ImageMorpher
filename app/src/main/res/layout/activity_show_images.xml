@@ -56,13 +56,9 @@
             android:contentDescription="@string/edit_imgEdit_desc" />
     </FrameLayout>
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|left|center_horizontal|right"
-        android:gravity="top|start|end"
-        android:weightSum="40"
         android:layout_weight="1">
 
         <Button
@@ -71,7 +67,9 @@
             android:text="@string/edit_btnSave"
             android:id="@+id/btnSave"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_gravity="center" />
+            android:layout_gravity="left"
+            android:onClick="actionSave"
+            android:layout_alignParentLeft="true" />
 
         <Button
             android:layout_width="wrap_content"
@@ -79,7 +77,12 @@
             android:text="@string/edit_btnOpen"
             android:id="@+id/btnOpen"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_gravity="center" />
+            android:layout_gravity="center_horizontal"
+            android:onClick="actionOpen"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_centerHorizontal="true" />
 
         <Button
             android:layout_width="wrap_content"
@@ -87,16 +90,9 @@
             android:text="@string/edit_btnBuild"
             android:id="@+id/btnBuild"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_gravity="center" />
-
-        <SeekBar
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/seekBar"
-            android:layout_gravity="center"
-            android:max="100"
-            android:progress="10" />
-
-    </LinearLayout>
+            android:layout_gravity="right"
+            android:onClick="build"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
 
 </LinearLayout>

@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Created by Joe on 2016-01-07.
  * Intended to display an image and allow the user to draw upon it.
  */
-public class EditView extends ImageView {
+public class EditView extends ImageView implements ProjectUpdateListener {
     //background image
     private Bitmap bgBitmap;
     private Bitmap bgBackup;
@@ -197,14 +197,17 @@ public class EditView extends ImageView {
                 if (tempLine != null) {
                     model.addLine(tempLine);
                     tempLine = null;
-                    invalidate();
-                } else {
-                    model.fireUpdate();
                 }
+                model.fireUpdate();
                 break;
             default:
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onProjectUpdate() {
+        invalidate();
     }
 }

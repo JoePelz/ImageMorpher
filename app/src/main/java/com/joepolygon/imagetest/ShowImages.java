@@ -31,7 +31,6 @@ public class ShowImages extends AppCompatActivity {
     private final static int PICK_GALLERY = 0x2;
     private final static int MY_REQUEST_CODE = 0x1;
 
-    private SeekBar seekBar;
     private Thumbnail imgLeft;
     private Thumbnail imgRight;
     private EditView  imgEdit;
@@ -48,7 +47,6 @@ public class ShowImages extends AppCompatActivity {
         Button btnBuild = (Button) findViewById(R.id.btnBuild);
         Button btnSave = (Button)  findViewById(R.id.btnSave);
         Button btnOpen = (Button)  findViewById(R.id.btnOpen);
-        seekBar  = (SeekBar)   findViewById(R.id.seekBar);
         imgLeft  = (Thumbnail) findViewById(R.id.imgLeft);
         imgLeft.setRole(Project.IMG_LEFT);
         imgRight = (Thumbnail) findViewById(R.id.imgRight);
@@ -61,17 +59,11 @@ public class ShowImages extends AppCompatActivity {
         imgRight.setModel(model);
         model.addUpdateListener(imgLeft);
         model.addUpdateListener(imgRight);
+        model.addUpdateListener(imgEdit);
 
         model.loadState(savedInstanceState);
 
         updateImages();
-
-        btnBuild.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.v("ShowImages", "Building " + seekBar.getProgress() + " frames...");
-            }
-        });
 
         imgLeft.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,23 +88,16 @@ public class ShowImages extends AppCompatActivity {
                 updateImages();
             }
         });
-
-        btnSave.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                //doStuff...
-                actionSave();
-            }
-        });
-        btnOpen.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                actionOpen();
-            }
-        });
     }
 
-    private void actionSave() {
+    public void build(View v) {
+        Intent intent = new Intent(this, DisplayResults.class);
+        //SeekBar seekBar  = (SeekBar) findViewById(R.id.seekBar);
+        //intent.putExtra("numFrames", seekBar.getProgress());
+        startActivity(intent);
+    }
+
+    public void actionSave(View v) {
         //save the current Project object to a file.
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
         try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(f))) {
@@ -123,7 +108,7 @@ public class ShowImages extends AppCompatActivity {
         }
     }
 
-    private void actionOpen() {
+    public void actionOpen(View v) {
         //replace the current Project object.
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
         try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
