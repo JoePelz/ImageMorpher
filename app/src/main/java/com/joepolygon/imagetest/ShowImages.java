@@ -2,6 +2,7 @@ package com.joepolygon.imagetest;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -62,7 +63,7 @@ public class ShowImages extends AppCompatActivity {
         model.addUpdateListener(imgEdit);
 
         model.loadState(savedInstanceState);
-
+        model.importImages();
         updateImages();
 
         imgLeft.setOnClickListener(new View.OnClickListener() {
@@ -99,27 +100,49 @@ public class ShowImages extends AppCompatActivity {
 
     public void actionSave(View v) {
         //save the current Project object to a file.
-        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
-        try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(f))) {
-            model.saveToFile(os);
-            Toast.makeText(this, "File saved, I think!", Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            Log.e("ShowImages", "actionSave (writeObject?) ran into IOException. " + e.getMessage());
-        }
+        final Context mainApp = this;
+        final CharSequence[] options = { "default", "Project1", "Project2", "Project3", "Cancel" };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ShowImages.this);
+        builder.setTitle("Choose Project");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                dialog.dismiss();
+                if (!options[item].equals("Cancel")) {
+                    if (model.saveProject(options[item].toString())) {
+                        Toast.makeText(mainApp, "Project '"+options[item]+"' saved", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+        builder.show();
     }
 
     public void actionOpen(View v) {
         //replace the current Project object.
-        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "save1.proj");
-        try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
-            if (model.loadFromFile(is)) {
-                Toast.makeText(this, "Project opened successfully. Maybe.", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "Could not open project. Sorry!", Toast.LENGTH_LONG).show();
-            }
-        } catch (IOException e) {
-            Log.e("ShowImages", "actionSave (writeObject?) ran into IOException. " + e.getMessage());
+        if (model.openProject("pickles")) {
+            Toast.makeText(this, "Project 'pickles' opened", Toast.LENGTH_LONG).show();
         }
+
+        final Context mainApp = this;
+        final CharSequence[] options = { "default", "Project1", "Project2", "Project3", "Cancel" };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ShowImages.this);
+        builder.setTitle("Choose Project");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                dialog.dismiss();
+                if (!options[item].equals("Cancel")) {
+                    if (model.openProject(options[item].toString())) {
+                        Toast.makeText(mainApp, "Project '"+options[item]+"' opened", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+        builder.show();
+        updateImages();
     }
 
     private void updateImages() {

@@ -6,13 +6,19 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -27,10 +33,9 @@ public class Project {
     public static final int IMG_EDIT = 2;
 
     //Images for display and manipulation
+    private String  projectName;
     private Bitmap  leftImage;
-    private Uri     leftImageUri;
     private Bitmap  rightImage;
-    private Uri     rightImageUri;
     private int     imgToEdit;
     private boolean isLeftLoaded;
     private boolean isRightLoaded;
@@ -38,8 +43,72 @@ public class Project {
     private ArrayList<Line> leftLines;
     private ArrayList<Line> rightLines;
     private int selectedLineIndex;
+    private boolean bImagesDirty;
 
     ArrayList<ProjectUpdateListener> listeners = new ArrayList<ProjectUpdateListener>();
+
+    public Project(Context app) {
+        appContext = app;
+        leftLines = new ArrayList<Line>();
+        rightLines = new ArrayList<Line>();
+        selectedLineIndex = -1;
+        openProject("default");
+    }
+
+    public boolean saveProject(String name) {
+        String oldName = projectName;
+        projectName = name;
+        boolean newName = projectName.equals(name);
+
+        File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName);
+        if (f.isDirectory()) {
+            Log.v("Project", "Project directory exists. Replacing.");
+        } else {
+            if (f.mkdir()) {
+                Log.v("Project", "Project directory created successfully.");
+            } else {
+                Log.v("Project", "Failed to create project directory.");
+                projectName = oldName;
+                Toast.makeText(appContext, "Failed. Reverting to " + oldName, Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        if (newName || bImagesDirty) {
+            exportImages();
+        }
+        f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name + File.separator + "data.prj");
+        try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(f))) {
+            saveToFile(os);
+            importImages();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public boolean openProject(String name) {
+        File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name);
+        if (!f.isDirectory()) {
+            return false;
+        }
+        projectName = name;
+        f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name + File.separator + "data.prj");
+        if (f.isFile()) {
+            try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
+                importImages();
+                loadFromFile(is);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        fireUpdate();
+        return true;
+    }
+
+    public String getProject() {
+        return projectName;
+    }
 
     public void addUpdateListener(ProjectUpdateListener listener) {
         listeners.add(listener);
@@ -132,13 +201,6 @@ public class Project {
         return true;
     }
 
-    public Project(Context app) {
-        appContext = app;
-        leftLines = new ArrayList<Line>();
-        rightLines = new ArrayList<Line>();
-        selectedLineIndex = -1;
-    }
-
     public Bitmap getImage(int image) {
         if (image == IMG_EDIT)
             image = imgToEdit;
@@ -154,23 +216,82 @@ public class Project {
     }
 
     public void setLeft(Uri imageUri) throws FileNotFoundException {
-        InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri);
-        Bitmap temp = BitmapFactory.decodeStream(inputStream);
-        if (temp != null) {
-            int size = minSide(temp);
-            leftImage = ThumbnailUtils.extractThumbnail(temp, size, size, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-            leftImageUri = imageUri;
+        try (InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri)) {
+            Bitmap temp = BitmapFactory.decodeStream(inputStream);
+            if (temp != null) {
+                int size = minSide(temp);
+                leftImage = ThumbnailUtils.extractThumbnail(temp, size, size, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            }
+        } catch (IOException e) {
+            Log.v("Project", "setLeft: couldn't close inputStream??");
+            e.printStackTrace();
         }
+        bImagesDirty = true;
     }
 
     public void setRight(Uri imageUri) throws FileNotFoundException {
-        InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri);
-        Bitmap temp = BitmapFactory.decodeStream(inputStream);
-        if (temp != null) {
-            int size = minSide(temp);
-            rightImage = ThumbnailUtils.extractThumbnail(temp, size, size, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-            rightImageUri = imageUri;
+        try (InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri)) {
+            Bitmap temp = BitmapFactory.decodeStream(inputStream);
+            if (temp != null) {
+                int size = minSide(temp);
+                rightImage = ThumbnailUtils.extractThumbnail(temp, size, size, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            }
+        } catch (IOException e) {
+            Log.v("Project", "setRight: couldn't close inputStream??");
+            e.printStackTrace();
         }
+        bImagesDirty = true;
+    }
+
+    public void importImages() {
+        File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
+        try (InputStream inputStream = new FileInputStream(f)) {
+            rightImage = BitmapFactory.decodeStream(inputStream);
+        } catch (FileNotFoundException e) {
+            Log.v("Project", "importImages suffered a FileNotFound exception");
+            Log.v("Project", "importImagesRight couldn't open " + f.getAbsolutePath());
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.v("Project", "importImages suffered an IO exception");
+            e.printStackTrace();
+        }
+
+        f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");
+        try (InputStream inputStream = new FileInputStream(f)) {
+            leftImage = BitmapFactory.decodeStream(inputStream);
+        } catch (FileNotFoundException e) {
+            Log.v("Project", "importImages suffered a FileNotFound exception");
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.v("Project", "importImages suffered an IO exception");
+            e.printStackTrace();
+        }
+        bImagesDirty = false;
+    }
+
+    public void exportImages() {
+        File f;
+        if (leftImage != null) {
+            f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");
+            try (OutputStream stream = new FileOutputStream(f)) {
+                leftImage.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                Log.v("Project", "exportImages: Wrote out the file leftImage.jpg to " + f.getAbsolutePath());
+            } catch (IOException e) {
+                Log.v("Project", "exportImages: Couldn't save leftImage.jpg. ");
+                e.printStackTrace();
+            }
+        }
+        if (rightImage != null) {
+            f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
+            try (OutputStream stream = new FileOutputStream(f)) {
+                rightImage.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                Log.v("Project", "exportImages: Wrote out the file rightImage.jpg to " + f.getAbsolutePath());
+            } catch (IOException e) {
+                Log.v("Project", "exportImages: Couldn't save rightImage.jpg. ");
+                e.printStackTrace();
+            }
+        }
+        bImagesDirty = false;
     }
 
     private int minSide(Bitmap srcBmp) {
@@ -179,47 +300,29 @@ public class Project {
 
     public void loadState(Bundle map) {
         String temp;
-        if (map == null) {
-            return;
+        if (map != null) {
+            projectName = map.getString("projName");
+            imgToEdit = map.getInt("imgEdit");
+            selectedLineIndex = map.getInt("controlLineSelection");
+            leftLines = (ArrayList<Line>) map.getSerializable("controlLinesLeft");
+            rightLines = (ArrayList<Line>) map.getSerializable("controlLinesRight");
         }
+        importImages();
 
-        leftImageUri = map.getParcelable("imgLeftUri");
-        rightImageUri = map.getParcelable("imgRightUri");
-
-        if (leftImageUri != null) {
-            try {
-                setLeft(leftImageUri);
-            } catch (FileNotFoundException e) {
-                Log.e("Project", "Load State: cannot load left image.");
-                e.printStackTrace();
-            }
-        }
-        if (rightImageUri != null) {
-            try {
-                setRight(rightImageUri);
-            } catch (FileNotFoundException e) {
-                Log.e("Project", "Load State: cannot load right image.");
-                e.printStackTrace();
-            }
-        }
-        imgToEdit = map.getInt("imgEdit");
-        selectedLineIndex = map.getInt("controlLineSelection");
-        leftLines = (ArrayList<Line>) map.getSerializable("controlLinesLeft");
-        rightLines = (ArrayList<Line>) map.getSerializable("controlLinesRight");
+        return;
     }
 
     public void saveState(Bundle map) {
-        map.putParcelable("imgLeftUri", leftImageUri);
-        map.putParcelable("imgRightUri", rightImageUri);
+        map.putString("projName", projectName);
         map.putInt("imgEdit", imgToEdit);
         map.putInt("controlLineSelection", selectedLineIndex);
         map.putSerializable("controlLinesLeft", leftLines);
         map.putSerializable("controlLinesRight", rightLines);
     }
-    public void saveToFile(ObjectOutputStream os) {
+
+
+    private void saveToFile(ObjectOutputStream os) {
         SaveObject data = new SaveObject();
-        data.leftUriEncoded = leftImageUri.toString();
-        data.rightUriEncoded = rightImageUri.toString();
         data.imgEdit = imgToEdit;
         data.selection = selectedLineIndex;
         data.lLines = leftLines;
@@ -230,7 +333,7 @@ public class Project {
             e.printStackTrace();
         }
     }
-    public boolean loadFromFile(ObjectInputStream is) {
+    private boolean loadFromFile(ObjectInputStream is) {
         SaveObject data = null;
         try {
             data = (SaveObject) is.readObject();
@@ -241,25 +344,6 @@ public class Project {
         }
         if (data == null) {
             return false;
-        }
-        leftImageUri = Uri.parse(data.leftUriEncoded);
-        rightImageUri = Uri.parse(data.rightUriEncoded);
-
-        if (leftImageUri != null) {
-            try {
-                setLeft(leftImageUri);
-            } catch (FileNotFoundException e) {
-                Log.e("Project", "Load From File: cannot load left image.");
-                e.printStackTrace();
-            }
-        }
-        if (rightImageUri != null) {
-            try {
-                setRight(rightImageUri);
-            } catch (FileNotFoundException e) {
-                Log.e("Project", "Load From File: cannot load right image.");
-                e.printStackTrace();
-            }
         }
 
         selectedLineIndex = data.selection;

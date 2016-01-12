@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * Created by Joe on 2016-01-09.
  */
 public class SaveObject implements Serializable {
-    public String leftUriEncoded;
+    public String projectName;
     public String rightUriEncoded;
     public int imgEdit;
     public int selection;

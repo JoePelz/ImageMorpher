@@ -7,10 +7,19 @@
     <string name="edit_btnSave">Save</string>
     <string name="edit_btnOpen">Open</string>
     <string name="title_activity_display_results">Results</string>
+
+    
     <string name="settings_num_frames">How many frames total in the transition.</string>
     <string name="settings_weights_a">Small value added, to prevent division by 0. Larger values blur the warp. a &gt; 0</string>
     <string name="settings_weights_b">Distance falloff exponent. Larger numbers result in tighter warps. 1 &lt;= b &lt;= 2</string>
     <string name="settings_weights_p">Line length effect. Non-zero values will cause the length of a control line to affect it\'s influence radius. 0 &lt;= P &lt;= 1</string>
     <string name="settings_btnRender">Render frames</string>
     <string name="settings_btnView">Play result</string>
+
+
+    <string name="dialog_save_title">Save project as...</string>
+    <string name="dialog_save_okay">Save</string>
+    <string name="dialog_save_cancel">Cancel</string>
+    <string name="dialog_save_user">Username</string>
+    <string name="dialog_save_pass">Password</string>
 </resources>
