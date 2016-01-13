@@ -14,16 +14,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 public class ShowImages extends AppCompatActivity {
     private final static int SELECT_PHOTO_LEFT = 0x10;
@@ -92,9 +86,10 @@ public class ShowImages extends AppCompatActivity {
     }
 
     public void build(View v) {
-        Intent intent = new Intent(this, DisplayResults.class);
+        Intent intent = new Intent(this, RenderSettings.class);
         //SeekBar seekBar  = (SeekBar) findViewById(R.id.seekBar);
         //intent.putExtra("numFrames", seekBar.getProgress());
+        intent.putExtra("project", model.getProject());
         startActivity(intent);
     }
 
@@ -136,13 +131,15 @@ public class ShowImages extends AppCompatActivity {
                 dialog.dismiss();
                 if (!options[item].equals("Cancel")) {
                     if (model.openProject(options[item].toString())) {
-                        Toast.makeText(mainApp, "Project '"+options[item]+"' opened", Toast.LENGTH_LONG).show();
+                        Toast.makeText(mainApp, "Project '" + options[item] + "' opened", Toast.LENGTH_LONG).show();
+                        model.importImages();
+                        Project.writeProjectName(mainApp, options[item].toString());
+                        updateImages();
                     }
                 }
             }
         });
         builder.show();
-        updateImages();
     }
 
     private void updateImages() {

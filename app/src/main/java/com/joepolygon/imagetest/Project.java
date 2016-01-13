@@ -10,15 +10,19 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -52,7 +56,12 @@ public class Project {
         leftLines = new ArrayList<Line>();
         rightLines = new ArrayList<Line>();
         selectedLineIndex = -1;
-        openProject("default");
+
+        projectName = readProjectName(app);
+        if (projectName == null) {
+            projectName = "default";
+        }
+        openProject(projectName);
     }
 
     public boolean saveProject(String name) {
@@ -73,6 +82,9 @@ public class Project {
                 return false;
             }
         }
+        if (newName && !writeProjectName(appContext, projectName)) {
+            Toast.makeText(appContext, "Failed to save project name", Toast.LENGTH_LONG).show();
+        }
         if (newName || bImagesDirty) {
             exportImages();
         }
@@ -84,6 +96,37 @@ public class Project {
             e.printStackTrace();
         }
         return true;
+    }
+
+    public static boolean writeProjectName(Context ctx, String name) {
+        File f = new File(ctx.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "proj.txt");
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)))) {
+            bw.write(name);
+        } catch (FileNotFoundException e) {
+            Log.e("Project", "FNFE: couldn't write new project name.");
+            return false;
+        } catch (IOException e) {
+            Log.e("Project", "IOE: couldn't write new project name.");
+            return false;
+        }
+        return true;
+    }
+
+    public static String readProjectName(Context ctx) {
+        File f = new File(ctx.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "proj.txt");
+        if (f.canRead()) {
+            try ( BufferedReader isr = new BufferedReader(new InputStreamReader(new FileInputStream(f)))) {
+                return isr.readLine();
+            } catch (FileNotFoundException e) {
+                Log.e("Project", "FNFE: couldn't read last project name.");
+                return null;
+            } catch (IOException e) {
+                Log.e("Project", "IOE: couldn't read last project name.");
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     public boolean openProject(String name) {
