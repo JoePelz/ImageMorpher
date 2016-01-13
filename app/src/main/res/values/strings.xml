@@ -23,4 +23,7 @@
     <string name="dialog_save_user">Username</string>
     <string name="dialog_save_pass">Password</string>
     <string name="title_activity_playback">Playback</string>
+
+
+    <string name="playback_content_description">Image morphing from the original left image to the final right image.</string>
 </resources>

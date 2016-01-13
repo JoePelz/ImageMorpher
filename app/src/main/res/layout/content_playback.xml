@@ -20,7 +20,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="100dp" />
+        android:layout_marginBottom="100dp"
+        android:contentDescription="@string/playback_content_description" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -37,7 +38,8 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
             android:nestedScrollingEnabled="false"
-            android:onClick="onBackward" />
+            android:onClick="onBackward"
+            android:textSize="50sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -46,7 +48,8 @@
             android:id="@+id/btnStepBack"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
-            android:onClick="onStepBack" />
+            android:onClick="onStepBack"
+            android:textSize="50sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -55,7 +58,8 @@
             android:id="@+id/btnStop"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
-            android:onClick="onStop" />
+            android:onClick="onStop"
+            android:textSize="50sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -64,7 +68,8 @@
             android:id="@+id/btnStepForward"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
-            android:onClick="onStepForward" />
+            android:onClick="onStepForward"
+            android:textSize="50sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -73,7 +78,8 @@
             android:id="@+id/btnForward"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
-            android:onClick="onForward" />
+            android:onClick="onForward"
+            android:textSize="50sp" />
     </LinearLayout>
 
 </RelativeLayout>

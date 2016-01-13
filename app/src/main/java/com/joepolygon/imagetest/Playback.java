@@ -31,7 +31,7 @@ public class Playback extends AppCompatActivity {
     }
 
     public void onStepBack(View v) {
-        
+
     }
 
     public void onStepForward(View v) {
