@@ -139,6 +139,8 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     public void onView(View v) {
         Log.v("RenderSettings", "View clicked");
         //switch to render view
+        Intent intent = new Intent(this, Playback.class);
+        startActivity(intent);
     }
 
     public void updateProgressMessage() {

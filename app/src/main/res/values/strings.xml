@@ -8,7 +8,7 @@
     <string name="edit_btnOpen">Open</string>
     <string name="title_activity_display_results">Results</string>
 
-    
+
     <string name="settings_num_frames">How many frames total in the transition.</string>
     <string name="settings_weights_a">Small value added, to prevent division by 0. Larger values blur the warp. a &gt; 0</string>
     <string name="settings_weights_b">Distance falloff exponent. Larger numbers result in tighter warps. 1 &lt;= b &lt;= 2</string>
@@ -22,4 +22,5 @@
     <string name="dialog_save_cancel">Cancel</string>
     <string name="dialog_save_user">Username</string>
     <string name="dialog_save_pass">Password</string>
+    <string name="title_activity_playback">Playback</string>
 </resources>
