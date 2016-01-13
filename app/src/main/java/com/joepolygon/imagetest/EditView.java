@@ -2,21 +2,14 @@ package com.joepolygon.imagetest;
 
 import android.content.Context;
 import android.graphics.Matrix;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.media.ThumbnailUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.view.View;
 import android.widget.ImageView;
 
-import java.util.ArrayList;
 
 /**
  * Created by Joe on 2016-01-07.
@@ -118,8 +111,8 @@ public class EditView extends ImageView implements ProjectUpdateListener {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        final float threshhold = 0.06f;
-        float closestDist = threshhold + 1;
+        final float threshold = 0.06f;
+        float closestDist = threshold + 1;
         Line closestLine = null;
         float tempx, tempy;
 
@@ -147,7 +140,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
                         }
                     }
                 }
-                if (closestDist < threshhold) {
+                if (closestDist < threshold) {
                     model.selectLine(closestLine);
                     selectedVertex = closestLine.getClosestVertex(startx, starty);
                     tempLine = null;

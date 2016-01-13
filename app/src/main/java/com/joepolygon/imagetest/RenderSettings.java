@@ -18,13 +18,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.URISyntaxException;
 
 public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, TextView.OnEditorActionListener {
     private ProgressBar pb;
@@ -45,7 +41,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
 
         android.support.v7.app.ActionBar temp = getSupportActionBar();
         if (temp != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            temp.setDisplayHomeAsUpEnabled(true);
         }
 
         pb = (ProgressBar) findViewById(R.id.progressRendering);
@@ -79,7 +75,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         //get render settings from project folder (if exists)
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "render.cfg");
 
-        String jsonData = null;
+        String jsonData;
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             jsonData = br.readLine();
         } catch (IOException e) {
@@ -97,7 +93,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             Log.v("RenderSettings", "restoreProject failed with a JSON Exception: " + e.getMessage());
             return false;
         }
-
+        updateProgressMessage();
 
         return true;
     }
@@ -127,7 +123,10 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         Log.v("RenderSettings", "Render clicked");
         //create folder "frames"
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "frames" );
-        f.mkdir();
+        if (!f.mkdir() || !f.isDirectory()) {
+            Log.e("RenderSettings", "onRender making the frames folder failed.");
+            return;
+        }
 
         //save settings in folder
         saveProject();
@@ -154,10 +153,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         String text = v.getText().toString();
-        SeekBar sb;
         String tag = v.getTag().toString();
-        double val;
-        int frames;
 
         switch (tag) {
             case "frames":
@@ -180,7 +176,6 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        EditText field;
         if (!fromUser)
             return;
         String tag = (String) seekBar.getTag();

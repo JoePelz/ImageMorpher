@@ -41,20 +41,20 @@ public class Project {
     private Bitmap  leftImage;
     private Bitmap  rightImage;
     private int     imgToEdit;
-    private boolean isLeftLoaded;
-    private boolean isRightLoaded;
+    private boolean isLeftEmpty = true;
+    private boolean isRightEmpty = true;
     private final Context appContext;
     private ArrayList<Line> leftLines;
     private ArrayList<Line> rightLines;
     private int selectedLineIndex;
     private boolean bImagesDirty;
 
-    ArrayList<ProjectUpdateListener> listeners = new ArrayList<ProjectUpdateListener>();
+    private final ArrayList<ProjectUpdateListener> listeners = new ArrayList<>();
 
     public Project(Context app) {
         appContext = app;
-        leftLines = new ArrayList<Line>();
-        rightLines = new ArrayList<Line>();
+        leftLines = new ArrayList<>();
+        rightLines = new ArrayList<>();
         selectedLineIndex = -1;
 
         projectName = readProjectName(app);
@@ -164,21 +164,18 @@ public class Project {
         }
     }
 
-    public void setLoaded(int image, boolean isLoaded) {
+    public void setLoaded(int image) {
         if (image == IMG_LEFT) {
-            isLeftLoaded = isLoaded;
+            isLeftEmpty = false;
         } else {
-            isRightLoaded = isLoaded;
+            isRightEmpty = false;
         }
     }
-    public void setRightLoaded(boolean isLoaded) {
-        isRightLoaded = isLoaded;
+    public boolean isLeftEmpty() {
+        return isLeftEmpty;
     }
-    public boolean isLeftLoaded() {
-        return isLeftLoaded;
-    }
-    public boolean isRightLoaded() {
-        return isRightLoaded;
+    public boolean isRightEmpty() {
+        return isRightEmpty;
     }
 
     public ArrayList<Line> getLines() {
@@ -211,6 +208,7 @@ public class Project {
         fireUpdate();
     }
 
+    /*   //unused...
     public boolean removeLine(Line l) {
         int index;
         if (imgToEdit == IMG_LEFT) {
@@ -226,6 +224,7 @@ public class Project {
         fireUpdate();
         return true;
     }
+    */
 
     public boolean removeSelected() {
         if (selectedLineIndex == -1) {
@@ -258,7 +257,7 @@ public class Project {
         imgToEdit = image;
     }
 
-    public void setLeft(Uri imageUri) throws FileNotFoundException {
+    public void setLeft(Uri imageUri) {
         try (InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri)) {
             Bitmap temp = BitmapFactory.decodeStream(inputStream);
             if (temp != null) {
@@ -272,7 +271,7 @@ public class Project {
         bImagesDirty = true;
     }
 
-    public void setRight(Uri imageUri) throws FileNotFoundException {
+    public void setRight(Uri imageUri) {
         try (InputStream inputStream = appContext.getContentResolver().openInputStream(imageUri)) {
             Bitmap temp = BitmapFactory.decodeStream(inputStream);
             if (temp != null) {
@@ -342,17 +341,18 @@ public class Project {
     }
 
     public void loadState(Bundle map) {
-        String temp;
         if (map != null) {
             projectName = map.getString("projName");
             imgToEdit = map.getInt("imgEdit");
             selectedLineIndex = map.getInt("controlLineSelection");
-            leftLines = (ArrayList<Line>) map.getSerializable("controlLinesLeft");
-            rightLines = (ArrayList<Line>) map.getSerializable("controlLinesRight");
+            Serializable sr = map.getSerializable("controlLinesLeft");
+            if (sr instanceof ArrayList)
+                leftLines = (ArrayList<Line>) sr;
+            sr = map.getSerializable("controlLinesRight");
+            if (sr instanceof ArrayList)
+                rightLines = (ArrayList<Line>) sr;
         }
         importImages();
-
-        return;
     }
 
     public void saveState(Bundle map) {
@@ -381,8 +381,10 @@ public class Project {
         try {
             data = (SaveObject) is.readObject();
         } catch (ClassNotFoundException e) {
+            Log.e("Project", "loadFromFile encountered a ClassNotFoundException.");
             e.printStackTrace();
         } catch (IOException e) {
+            Log.e("Project", "loadFromFile encountered a IOException.");
             e.printStackTrace();
         }
         if (data == null) {

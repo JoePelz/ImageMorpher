@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.media.ThumbnailUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -75,7 +74,7 @@ public class Thumbnail extends ImageView implements ProjectUpdateListener {
         }
         bgBitmap = bgBackup;
         super.setImageBitmap(bgBitmap);
-        model.setLoaded(role, true);
+        model.setLoaded(role);
 
         drawMatrix = getImageMatrix();
         drawMatrix.getValues(matValues);

@@ -10,20 +10,22 @@
 
 
     <string name="settings_num_frames">How many frames total in the transition.</string>
+    <string name="settings_num_frames_default">50</string>
     <string name="settings_weights_a">Small value added, to prevent division by 0. Larger values blur the warp. a &gt; 0</string>
+    <string name="settings_weights_a_default">0.03</string>
     <string name="settings_weights_b">Distance falloff exponent. Larger numbers result in tighter warps. 1 &lt;= b &lt;= 2</string>
+    <string name="settings_weights_b_default">2.0</string>
     <string name="settings_weights_p">Line length effect. Non-zero values will cause the length of a control line to affect it\'s influence radius. 0 &lt;= P &lt;= 1</string>
+    <string name="settings_weights_p_default">0.0</string>
     <string name="settings_btnRender">Render frames</string>
     <string name="settings_btnView">Play result</string>
 
 
-    <string name="dialog_save_title">Save project as...</string>
-    <string name="dialog_save_okay">Save</string>
-    <string name="dialog_save_cancel">Cancel</string>
-    <string name="dialog_save_user">Username</string>
-    <string name="dialog_save_pass">Password</string>
     <string name="title_activity_playback">Playback</string>
-
-
     <string name="playback_content_description">Image morphing from the original left image to the final right image.</string>
+    <string name="playback_stop">| |</string>
+    <string name="playback_step_backward">|&lt;|</string>
+    <string name="playback_step_forward">|&gt;|</string>
+    <string name="playback_backward">&lt;</string>
+    <string name="playback_forward">&gt;</string>
 </resources>

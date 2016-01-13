@@ -3,14 +3,13 @@ package com.joepolygon.imagetest;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.util.Log;
 
 import java.io.Serializable;
 
 /**
+ * Represents a line, by two points. Can be used as a vector when the first point is 0,0
  * Created by Joe on 2016-01-08.
  */
 class Line implements Serializable{
@@ -45,10 +44,6 @@ class Line implements Serializable{
     private float[] pts;
     private float[] ptsXform;
 
-    public Line(PointF start, PointF end) {
-        init(start.x, start.y, end.x, end.y);
-    }
-
     public Line(float x, float y) {
         init(0, 0, x, y);
     }
@@ -70,29 +65,15 @@ class Line implements Serializable{
         pts[3] = y1;
 
     }
-
-    public void setP0(PointF newA) {
-        pts[0] = newA.x;
-        pts[1] = newA.y;
-    }
     public void setP0(float x, float y) {
         pts[0] = x;
         pts[1] = y;
-    }
-    public void setP1(PointF newB) {
-        pts[2] = newB.x;
-        pts[3] = newB.y;
     }
     public void setP1(float x, float y) {
         pts[2] = x;
         pts[3] = y;
     }
-    public PointF getP0() {
-        return new PointF(pts[0], pts[1]);
-    }
-    public PointF getP1() {
-        return new PointF(pts[2], pts[3]);
-    }
+
     public float[] getPts() {
         return pts;
     }
