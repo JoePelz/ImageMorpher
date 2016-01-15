@@ -78,15 +78,9 @@ class Line implements Serializable{
         return pts;
     }
 
-    public void normal(Line out) {
-        out.setP0(0, 0);
-        // (-dy, dx)
-        out.setP1(pts[1] - pts[3], pts[2] - pts[0]);
-    }
-
-    public float dotProduct(Line op) {
-        float[] temp = op.getPts();
-        return (pts[2] - pts[0]) * temp[2] + (pts[3] - pts[1]) * temp[3];
+    public void normal(VectorF out) {
+        out.x = pts[1] - pts[3];
+        out.y = pts[2] - pts[0];
     }
 
     public float length() {
@@ -94,11 +88,9 @@ class Line implements Serializable{
     }
 
     public float distanceFromLine(float x, float y) {
-        Line hypotenuse = new Line(pts[0] - x, pts[1] - y);
-        Line n = new Line(0, 0);
-        normal(n);
-        //Log.v("Line", "distance from " + this + " to (" + x + ", " + y + ") is " + result);
-        return hypotenuse.dotProduct(n) / n.length();
+        float distanceToA = getDistSquared(pts[0], pts[1], x, y);
+        float distanceToB = getDistSquared(pts[2], pts[3], x, y);
+        return (float) Math.sqrt(Math.min(distanceToA, distanceToB));
     }
 
     public int getClosestVertex(float x, float y) {
