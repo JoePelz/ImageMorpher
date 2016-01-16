@@ -15,36 +15,7 @@ import java.io.Serializable;
 class Line implements Serializable{
     public static final int P0 = 0;
     public static final int P1 = 1;
-
-    public static final Paint paintErasable = new Paint();
-    public static final Paint paintNice = new Paint();
-    public static final Paint paintSelected = new Paint();
-    public static final Paint paintThin = new Paint();
-    static {
-        paintErasable.setStrokeWidth(5);
-        paintErasable.setAntiAlias(false);
-        paintErasable.setColor(0xFFFFFFFF);
-        paintErasable.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.XOR));
-
-        paintNice.setStrokeWidth(3);
-        paintNice.setAntiAlias(true);
-        paintNice.setColor(0xFF99FFAA);
-        paintNice.setStyle(Paint.Style.STROKE);
-
-        paintSelected.setStrokeWidth(6);
-        paintSelected.setAntiAlias(true);
-        paintSelected.setColor(0xFF0000FF);
-        paintSelected.setStyle(Paint.Style.STROKE);
-
-        paintThin.setStrokeWidth(0);
-        paintThin.setAntiAlias(true);
-        paintThin.setColor(0xFFFFFFFF);
-        paintThin.setStyle(Paint.Style.FILL_AND_STROKE);
-    }
-
-
     private float[] pts;
-    private float[] ptsXform;
 
     public Line(float x, float y) {
         init(0, 0, x, y);
@@ -58,7 +29,6 @@ class Line implements Serializable{
         //three points. Start, middle, end.
         //format: x0, y0,  x1, y1,  x2, y2
         pts = new float[4];
-        ptsXform = new float[4];
 
         pts[0] = x0;
         pts[1] = y0;
@@ -104,19 +74,6 @@ class Line implements Serializable{
 
     private float getDistSquared(float x0, float y0, float x1, float y1) {
         return (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0);
-    }
-
-    public void draw(Canvas c, Matrix m, Paint p) {
-        if (c == null || m == null) {
-            return;
-        }
-        m.mapPoints(ptsXform, pts);
-        //Log.v("Line", "pts (" + pts[0] + "," + pts[1] + ") mapped to (" + ptsXform[0] + "," + ptsXform[1] + ")");
-        c.drawLine(ptsXform[0], ptsXform[1], ptsXform[2], ptsXform[3], p);
-
-        for(int i = 0; i < ptsXform.length; i+= 2) {
-            c.drawCircle(ptsXform[i], ptsXform[i+1], 10, p);
-        }
     }
 
     @Override

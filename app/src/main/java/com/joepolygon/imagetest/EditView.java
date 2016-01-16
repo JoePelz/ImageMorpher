@@ -99,13 +99,13 @@ public class EditView extends ImageView implements ProjectUpdateListener {
         }
 
         if (model.getSelectedLine() != null)
-            model.getSelectedLine().draw(c, drawMatrix, Line.paintSelected);
+            LineArtist.draw(c, drawMatrix, model.getSelectedLine(), LineArtist.paintSelected);
 
         for (Line l : model.getLines()) {
-            l.draw(c, drawMatrix, Line.paintNice);
+            LineArtist.draw(c, drawMatrix, l, LineArtist.paintNice);
         }
         if (tempLine != null) {
-            tempLine.draw(c, drawMatrix, Line.paintErasable);
+            LineArtist.draw(c, drawMatrix, tempLine, LineArtist.paintErasable);
         }
 
     }
