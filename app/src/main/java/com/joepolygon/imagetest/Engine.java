@@ -2,6 +2,8 @@ package com.joepolygon.imagetest;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 
 /**
  * Created by Joe on 2016-01-13.
@@ -35,12 +37,12 @@ public class Engine {
         this.height = height;
     }
 
-    public double weight(float lineLength, float distance) {
-        return Math.pow(Math.pow(lineLength, P) / (a + distance), b);
+    public float weight(float lineLength, float distance) {
+        return (float) Math.pow(Math.pow(lineLength, P) / (a + distance), b);
     }
 
-    public Point findEquivalentPoint(Line A, Line B, int x, int y) {
-        Point equivalent = new Point();
+    public PointF findEquivalentPoint(Line A, Line B, int x, int y) {
+        PointF equivalent = new PointF();
         float tempX, tempY;
 
         //calculate D and F from A
@@ -55,28 +57,48 @@ public class Engine {
 
         //travel along PQ
         f = B.getPts();
-        tempX = Vb.x * F + f[0];
-        tempY = Vb.y * F + f[1];
+        equivalent.x = Vb.x * F + f[0];
+        equivalent.y = Vb.y * F + f[1];
         Nb.scale(D / Nb.length());
-        equivalent.x = (int)(tempX - Nb.x);
-        equivalent.y = (int)(tempY - Nb.y);
+        equivalent.x -= Nb.x;
+        equivalent.y -= Nb.y;
 
         return equivalent;
     }
 
 
 
-    public Point calcVector() {
-        Point result = new Point();
-        //resolution
-        //arrayLines src
-        //arrayLines dst
-        //point x, y
+    public Point vectorForPoint(ArrayList<Line> srcs, ArrayList<Line> dsts, int x, int y) {
+        Line A = null;
+        Line B = null;
+        int nLines = srcs.size();
+        PointF[] dP = new PointF[nLines];
+        PointF dPSum = new PointF(0, 0);
+        float[] W = new float[nLines];
+        float WSum = 0;
 
+        //calculate point and weight for each line
+        for(int i = 0; i < nLines; i++) {
+            A = srcs.get(i);
+            B = dsts.get(i);
+            //new position relative to (0, 0)
+            dP[i] = findEquivalentPoint(A, B, x, y);
+            dP[i].x -= x; //now relative to (x, 0)
+            dP[i].y -= y; //now relative to (x, y)
+            W[i] = weight(A.length(), A.distanceFromLine(x, y));
+            //multiply by weight
+            dPSum.x += dP[i].x * W[i];
+            dPSum.y += dP[i].y * W[i];
+            WSum += W[i];
+        }
+        //divide offset sum by weight sum
+        dPSum.x /= WSum;
+        dPSum.y /= WSum;
 
+        //save final offset
+        Point result = new Point((int)dPSum.x, (int)dPSum.y);
 
-
-        return null;
+        return result;
     }
 
 
