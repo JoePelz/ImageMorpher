@@ -97,6 +97,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
         if (model == null) {
             return;
         }
+
         if (model.getSelectedLine() != null)
             model.getSelectedLine().draw(c, drawMatrix, Line.paintSelected);
 
@@ -106,6 +107,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
         if (tempLine != null) {
             tempLine.draw(c, drawMatrix, Line.paintErasable);
         }
+
     }
 
 

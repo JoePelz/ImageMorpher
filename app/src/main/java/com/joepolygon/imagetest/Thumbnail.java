@@ -92,11 +92,13 @@ public class Thumbnail extends ImageView implements ProjectUpdateListener {
         if (model == null) {
             return;
         }
+
         if (model.getSelectedLine(role) != null)
             model.getSelectedLine(role).draw(c, drawMatrix, Line.paintSelected);
         for (Line l : model.getLines(role)) {
             l.draw(c, drawMatrix, Line.paintThin);
         }
+
     }
 
     @Override

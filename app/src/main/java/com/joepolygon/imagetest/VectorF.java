@@ -15,6 +15,12 @@ public class VectorF {
         this.y = y;
     }
 
+    public VectorF(Line l) {
+        float[] pts = l.getPts();
+        this.x = pts[2] - pts[0];
+        this.y = pts[3] - pts[1];
+    }
+
     public VectorF(Vector v) {
         x = v.x;
         y = v.y;
@@ -46,6 +52,10 @@ public class VectorF {
     public void scale(float s) {
         x *= s;
         y *= s;
+    }
+    public void scale(float sx, float sy) {
+        x *= sx;
+        y *= sy;
     }
 
     /**
@@ -92,6 +102,21 @@ public class VectorF {
         VectorF XP = new VectorF(this.x - x, this.y - y);
         VectorF n = normal();
         return XP.projectionLength(n);
+    }
+
+    public float distToPoint(float x, float y, float originX, float originY) {
+        x -= originX;
+        y -= originY;
+        VectorF XP = new VectorF(this.x - x, this.y - y);
+        VectorF n = normal();
+        return XP.projectionLength(n);
+    }
+
+    public float distanceAlong(float x, float y, float originX, float originY) {
+        //(ProjPQ PX) / |PQ|
+        //this is PQ
+        VectorF PX = new VectorF(x - originX, y - originY);
+        return dotProduct(PX) / lengthSquared();
     }
 
     @Override

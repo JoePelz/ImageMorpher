@@ -15,6 +15,7 @@ import java.io.Serializable;
 class Line implements Serializable{
     public static final int P0 = 0;
     public static final int P1 = 1;
+
     public static final Paint paintErasable = new Paint();
     public static final Paint paintNice = new Paint();
     public static final Paint paintSelected = new Paint();
@@ -40,6 +41,7 @@ class Line implements Serializable{
         paintThin.setColor(0xFFFFFFFF);
         paintThin.setStyle(Paint.Style.FILL_AND_STROKE);
     }
+
 
     private float[] pts;
     private float[] ptsXform;

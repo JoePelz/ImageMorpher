@@ -151,4 +151,25 @@ public class VectorFTest {
         assertThat(v2.distToPoint(x, y), is(12.0f));
         assertThat(d.distToPoint(x, y), is(0.0f));
     }
+
+    @Test
+    public void VectorF_distanceAlong() {
+        VectorF a = new VectorF(100, 0);
+        assertEquals(0.25f, a.distanceAlong(25,  36, 0, 0), 0.00001);
+        assertEquals(0.75f, a.distanceAlong(75, -36, 0, 0), 0.00001);
+        assertEquals(-0.75f, a.distanceAlong(25,  36, 100, 0), 0.00001);
+        assertEquals(-0.25f, a.distanceAlong(75, -36, 100, 0), 0.00001);
+
+        VectorF b = new VectorF(0, 100);
+        assertEquals(0.36f, b.distanceAlong(25,  36, 0, 0), 0.00001);
+        assertEquals(-0.72f, b.distanceAlong(75, -72, 0, 0), 0.00001);
+        assertEquals(-0.28f, b.distanceAlong(25,  72, 0, 100), 0.00001);
+        assertEquals(-1.36f, b.distanceAlong(75, -36, 0, 100), 0.00001);
+
+        VectorF c = new VectorF(3, 3);
+        assertEquals(0.5f, c.distanceAlong(0, 3, 0, 0), 0.00001);
+        assertEquals(0.5f, c.distanceAlong(3, 0, 0, 0), 0.00001);
+        assertEquals(-0.5f, c.distanceAlong(3, 0, 3, 3), 0.00001);
+        assertEquals(-0.5f, c.distanceAlong(0, 3, 3, 3), 0.00001);
+    }
 }
