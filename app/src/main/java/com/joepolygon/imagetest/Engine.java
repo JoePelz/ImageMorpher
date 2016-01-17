@@ -15,28 +15,29 @@ import java.util.ArrayList;
 
 
 /**
+ * Rendering engine for the image warping. Will load the project images/lines and generate tweens.
  * Created by Joe on 2016-01-13.
  */
-public class Engine {
-    private Context app;
+class Engine {
+    private final Context app;
     private Bitmap imgA;
     private Bitmap imgB;
-    private int[] pixelsA, pixelsB, pixelsR;
-    private String projectName;
-    private int frames;
-    private int width;
-    private int height;
+    private final int[] pixelsA, pixelsB, pixelsR;
+    private final String projectName;
+    private final int frames;
+    private final int width;
+    private final int height;
     /** Small value added to prevent division by 0. */
-    private float a;
+    private final float a;
     /** Distance falloff exponent. */
-    private float b;
+    private final float b;
     /** Influence of line length on magnitude of effect. */
-    private float P;
+    private final float P;
 
     /** The lines on the src(A) image. */
-    private ArrayList<Line> srcs;
+    private final ArrayList<Line> srcs;
     /** The lines on the dst(B) image. */
-    private ArrayList<Line> dsts;
+    private final ArrayList<Line> dsts;
 
 
     /** Forward offsets to find the origin of a point in the destination. */
@@ -48,9 +49,9 @@ public class Engine {
      * Create a new rendering engine.
      * @param project The project name to work within
      * @param frames The number of frames to render
-     * @param a
-     * @param b
-     * @param P
+     * @param a A small value to prevent division by 0.  increasing this smooths the warp.
+     * @param b Controls falloff of the range of effect based on distance from lines. Higher values tighten up effect to only be close to lines.
+     * @param P Indicates the effect of line length of range of effect.
      */
     public Engine(Context app, String project, int frames, float a, float b, float P, int width, int height) {
         this.app = app;
@@ -63,10 +64,10 @@ public class Engine {
         this.height = height;
         Project p = new Project(app);
         if (p.isLeftLoaded()) {
-            imgA = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_LEFT), 512, 512);
+            imgA = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_LEFT), width, height);
         }
         if (p.isRightLoaded()) {
-            imgB = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_RIGHT), 512, 512);
+            imgB = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_RIGHT), width, height);
         }
         pixelsA = new int[width * height];
         pixelsB = new int[width * height];
@@ -142,7 +143,7 @@ public class Engine {
             dP[i] = findEquivalentPoint(A, B, x, y);
             dP[i].x -= x; //now relative to (x, 0)
             dP[i].y -= y; //now relative to (x, y)
-            W[i] = weight(A.length(), A.distanceFromLine(x, y));
+            W[i] = weight(A.length(), A.distanceFromLinePts(x, y));
             //multiply by weight
             dPSum.x += dP[i].x * W[i];
             dPSum.y += dP[i].y * W[i];
@@ -155,7 +156,7 @@ public class Engine {
         return new Point((int)dPSum.x, (int)dPSum.y);
     }
 
-    public void generateMapForDstPoints() {
+    private void generateMapForDstPoints() {
         int size = width * height * 2;
         Point offset;
         forward = new int[size];
@@ -170,7 +171,7 @@ public class Engine {
         }
     }
 
-    public void generateMapForSrcPoints() {
+    private void generateMapForSrcPoints() {
         int size = width * height * 2;
         Point offset;
         backward = new int[size];
@@ -201,7 +202,7 @@ public class Engine {
         return result;
     }
 
-    public Bitmap generateImage(int num, int denom) {
+    private Bitmap generateImage(int num, int denom) {
         if (num == 0) {
             return imgA;
         } else if (num == denom) {
@@ -209,7 +210,7 @@ public class Engine {
         } else if (num < 0 || num > denom) {
             throw new InvalidParameterException("numerator must be between 0 and the denominator inclusive.");
         }
-        Bitmap result = null;
+        Bitmap result;
         //num is between 0 and the denominator.
         //FWD = generate t_percent from A + vectors
         //BWD = generate (1-t_percent) from B + vectors
@@ -220,7 +221,7 @@ public class Engine {
 
 
         //placeholder
-        result = Bitmap.createBitmap(imgA);
+        result = Bitmap.createBitmap(width, height, imgA.getConfig());
         imgA.getPixels(pixelsA, 0, width, 0, 0, width, height);
         imgB.getPixels(pixelsB, 0, width, 0, 0, width, height);
 
@@ -257,7 +258,7 @@ public class Engine {
         return result;
     }
 
-    public boolean saveFrame(Bitmap image, int frameNo) {
+    private boolean saveFrame(Bitmap image, int frameNo) {
         String filename = String.format("%04d.jpg", frameNo); //frame count limited to 0..9999
         boolean success = false;
         File f = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RenderSettings.RENDER_FOLDER + File.separator + filename);
@@ -273,7 +274,7 @@ public class Engine {
         return success;
     }
 
-    public void clearFrames() {
+    private void clearFrames() {
         File frameFolder = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RenderSettings.RENDER_FOLDER);
         File[] frameFolderContents = frameFolder.listFiles();
         for (File f : frameFolderContents) {

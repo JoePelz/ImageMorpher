@@ -1,11 +1,5 @@
 package com.joepolygon.imagetest;
 
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-
 import java.io.Serializable;
 
 /**
@@ -16,10 +10,6 @@ class Line implements Serializable{
     public static final int P0 = 0;
     public static final int P1 = 1;
     private float[] pts;
-
-    public Line(float x, float y) {
-        init(0, 0, x, y);
-    }
 
     public Line(float startx, float starty, float endx, float endy) {
         init(startx, starty, endx, endy);
@@ -50,16 +40,11 @@ class Line implements Serializable{
         return pts;
     }
 
-    public void normal(VectorF out) {
-        out.x = pts[1] - pts[3];
-        out.y = pts[2] - pts[0];
-    }
-
     public float length() {
         return (float)Math.hypot(pts[2]-pts[0], pts[3]-pts[1]);
     }
 
-    public float distanceFromLine(float x, float y) {
+    public float distanceFromLinePts(float x, float y) {
         float distanceToA = getDistSquared(pts[0], pts[1], x, y);
         float distanceToB = getDistSquared(pts[2], pts[3], x, y);
         return (float) Math.sqrt(Math.min(distanceToA, distanceToB));

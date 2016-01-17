@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * Created by Joe on 2016-01-05.
  */
 
-public class Project {
+class Project {
     public static final int IMG_LEFT = 0;
     public static final int IMG_RIGHT = 1;
     public static final int IMG_EDIT = 2;
@@ -133,7 +133,10 @@ public class Project {
         boolean result = false;
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name);
         if (!f.isDirectory()) {
-            f.mkdir();
+            if (!f.mkdir() && !f.isDirectory()) {
+                Log.e("Project", "Could not create the project.");
+                return false;
+            }
         }
         projectName = name;
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name + File.separator + "data.prj");
@@ -157,7 +160,7 @@ public class Project {
         return result;
     }
 
-    public void resetProject() {
+    private void resetProject() {
         leftImage = null;
         rightImage = null;
         setLoaded(IMG_LEFT, false);
@@ -288,7 +291,7 @@ public class Project {
         bImagesDirty = true;
     }
 
-    public void importImages() {
+    private void importImages() {
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
         rightImage = null;
         if (f.canRead()) {
@@ -321,7 +324,7 @@ public class Project {
         bImagesDirty = false;
     }
 
-    public void exportImages() {
+    private void exportImages() {
         File f;
         if (leftImage != null) {
             f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");

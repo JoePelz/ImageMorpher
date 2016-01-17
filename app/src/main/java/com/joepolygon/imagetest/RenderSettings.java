@@ -122,7 +122,6 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     }
 
     public void onRender(View v) {
-        Log.v("RenderSettings", "Render clicked");
         //create folder "frames"
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RENDER_FOLDER );
         if (!f.mkdir() && !f.isDirectory()) {
@@ -140,7 +139,6 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     }
 
     public void onView(View v) {
-        Log.v("RenderSettings", "View clicked");
         //switch to render view
         Intent intent = new Intent(this, Playback.class);
         startActivity(intent);
@@ -155,7 +153,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
-    public void updateProgressMessage() {
+    private void updateProgressMessage() {
         pb.setMax(frames);
         int rendered = getNumFramesRendered(this, projectName);
         pb.setProgress(Math.min(pb.getMax(), rendered));
@@ -217,7 +215,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
-    public void setFrames(int nFrames) {
+    private void setFrames(int nFrames) {
         EditText field = (EditText) findViewById(R.id.valFrames);
         SeekBar sb = (SeekBar) findViewById(R.id.seekFrames);
 
@@ -231,7 +229,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
         updateProgressMessage();
     }
-    public void setA(float dA) {
+    private void setA(float dA) {
         EditText field = (EditText) findViewById(R.id.valA);
         SeekBar sb = (SeekBar) findViewById(R.id.seekA);
 
@@ -245,7 +243,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)(a * 1000 - 1));
         }
     }
-    public void setB(float dB) {
+    private void setB(float dB) {
         EditText field = (EditText) findViewById(R.id.valB);
         SeekBar  sb = (SeekBar) findViewById(R.id.seekB);
 
@@ -262,7 +260,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)((b - 1) * 100));
         }
     }
-    public void setP(float dP) {
+    private void setP(float dP) {
         EditText field = (EditText) findViewById(R.id.valP);
         SeekBar sb = (SeekBar) findViewById(R.id.seekP);
 

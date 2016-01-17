@@ -46,7 +46,7 @@ public class Thumbnail extends ImageView implements ProjectUpdateListener {
         role = image;
     }
 
-    public void updateDimensions(int size) {
+    private void updateDimensions(int size) {
         if (bgBackup == null) {
             return;
         }

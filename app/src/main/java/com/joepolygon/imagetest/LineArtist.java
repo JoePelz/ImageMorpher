@@ -10,11 +10,10 @@ import android.graphics.PorterDuffXfermode;
  * Created to remove painting code from Line class.
  * Created by Joe on 2016-01-15.
  */
-public class LineArtist {
+class LineArtist {
     public static final Paint paintErasable = new Paint();
     public static final Paint paintNice = new Paint();
     public static final Paint paintSelected = new Paint();
-    public static final Paint paintThin = new Paint();
     static {
         paintErasable.setStrokeWidth(5);
         paintErasable.setAntiAlias(false);
@@ -30,11 +29,6 @@ public class LineArtist {
         paintSelected.setAntiAlias(true);
         paintSelected.setColor(0xFF0000FF);
         paintSelected.setStyle(Paint.Style.STROKE);
-
-        paintThin.setStrokeWidth(0);
-        paintThin.setAntiAlias(true);
-        paintThin.setColor(0xFFFFFFFF);
-        paintThin.setStyle(Paint.Style.FILL_AND_STROKE);
     }
 
 

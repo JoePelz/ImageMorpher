@@ -1,7 +1,6 @@
 package com.joepolygon.imagetest;
 
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,13 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Playback extends AppCompatActivity {
-    String projectName;
-    int frameCount;
-    int frameLoaded;
-    int downX, downFrame;
-    ImageView imgView;
-    Bitmap frame;
-    int width, height;
+    private String projectName;
+    private int frameCount;
+    private int frameLoaded;
+    private int downX, downFrame;
+    private ImageView imgView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +78,8 @@ public class Playback extends AppCompatActivity {
         return true;
     }
 
-    public void loadFrame(int frameNo) {
+    private void loadFrame(int frameNo) {
+        Bitmap frame;
         String fileName = String.format("%04d.jpg", frameNo);
         File f = new File(
                 this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)

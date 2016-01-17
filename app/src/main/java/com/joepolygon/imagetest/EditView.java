@@ -28,6 +28,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
     private Line tempLine;
     private float startx, starty;
 
+
     public EditView(Context context, AttributeSet attrs){
         super(context, attrs);
         setupDrawing();
@@ -48,7 +49,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
         this.model = model;
     }
 
-    public void updateDimensions(int size) {
+    private void updateDimensions(int size) {
         if (bgBackup == null) {
             return;
         }
@@ -136,7 +137,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
                 if (!model.getLines().isEmpty()) {
                     float tempDist;
                     for (Line l : model.getLines()) {
-                        tempDist = Math.abs(l.distanceFromLine(startx, starty));
+                        tempDist = Math.abs(l.distanceFromLinePts(startx, starty));
                         if (tempDist < closestDist) {
                             closestDist = tempDist;
                             closestLine = l;

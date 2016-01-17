@@ -1,6 +1,7 @@
 package com.joepolygon.imagetest;
 
 /**
+ * 2D Vector represented by two integers. Includes basic manipulation methods.
  * Created by Joe on 2016-01-13.
  */
 public class Vector {

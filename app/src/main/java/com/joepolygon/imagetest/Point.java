@@ -1,6 +1,7 @@
 package com.joepolygon.imagetest;
 
 /**
+ * Represents a 2D point as two integers.  x and y are publically accessible values.
  * Created by Joe on 2016-01-15.
  */
 public class Point {

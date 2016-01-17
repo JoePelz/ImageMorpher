@@ -5,9 +5,10 @@ import java.util.ArrayList;
 
 /**
  * Small class that represents saved project information, mostly just the lines.
+ * TODO: get rid of this. switch to json like RenderSettings
  * Created by Joe on 2016-01-09.
  */
-public class SaveObject implements Serializable {
+class SaveObject implements Serializable {
     public int imgEdit;
     public int selection;
     public ArrayList<Line> lLines;

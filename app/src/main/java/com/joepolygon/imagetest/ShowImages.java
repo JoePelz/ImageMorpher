@@ -39,9 +39,6 @@ public class ShowImages extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_images);
 
-        Button btnBuild = (Button) findViewById(R.id.btnBuild);
-        Button btnSave = (Button)  findViewById(R.id.btnSave);
-        Button btnOpen = (Button)  findViewById(R.id.btnOpen);
         imgLeft  = (Thumbnail) findViewById(R.id.imgLeft);
         imgLeft.setRole(Project.IMG_LEFT);
         imgRight = (Thumbnail) findViewById(R.id.imgRight);
