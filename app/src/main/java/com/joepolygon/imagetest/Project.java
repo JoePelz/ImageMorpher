@@ -41,8 +41,8 @@ public class Project {
     private Bitmap  leftImage;
     private Bitmap  rightImage;
     private int     imgToEdit;
-    private boolean isLeftEmpty = true;
-    private boolean isRightEmpty = true;
+    private boolean isLeftLoaded = false;
+    private boolean isRightLoaded = false;
     private final Context appContext;
     private ArrayList<Line> leftLines;
     private ArrayList<Line> rightLines;
@@ -135,10 +135,10 @@ public class Project {
         if (!f.isDirectory()) {
             f.mkdir();
         }
-        Log.v("Project", "project directory opened.");
         projectName = name;
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name + File.separator + "data.prj");
         if (f.isFile()) {
+            Log.v("Project", "project directory opened.");
             try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
                 Log.v("Project", "Importing images...");
                 importImages();
@@ -149,11 +149,25 @@ public class Project {
                 e.printStackTrace();
             }
         } else {
-            Log.v("Project", "Project " + name + " doesn't exist. Cannot open.");
+            Log.v("Project", "Project " + name + " doesn't exist. Creating.");
+            resetProject();
             result = true;
         }
         fireUpdate();
         return result;
+    }
+
+    public void resetProject() {
+        leftImage = null;
+        rightImage = null;
+        setLoaded(IMG_LEFT, false);
+        setLoaded(IMG_RIGHT, false);
+        leftLines = new ArrayList<>();
+        rightLines = new ArrayList<>();
+        selectedLineIndex = -1;
+        imgToEdit = IMG_LEFT;
+        bImagesDirty = true;
+        fireUpdate();
     }
 
     public String getProject() {
@@ -171,18 +185,18 @@ public class Project {
         }
     }
 
-    public void setLoaded(int image) {
+    public void setLoaded(int image, boolean loaded) {
         if (image == IMG_LEFT) {
-            isLeftEmpty = false;
+            isLeftLoaded = loaded;
         } else {
-            isRightEmpty = false;
+            isRightLoaded = loaded;
         }
     }
-    public boolean isLeftEmpty() {
-        return isLeftEmpty;
+    public boolean isLeftLoaded() {
+        return isLeftLoaded;
     }
-    public boolean isRightEmpty() {
-        return isRightEmpty;
+    public boolean isRightLoaded() {
+        return isRightLoaded;
     }
 
     public ArrayList<Line> getLines() {
@@ -280,7 +294,7 @@ public class Project {
         if (f.canRead()) {
             try (InputStream inputStream = new FileInputStream(f)) {
                 rightImage = BitmapFactory.decodeStream(inputStream);
-                setLoaded(IMG_RIGHT);
+                setLoaded(IMG_RIGHT, true);
             } catch (FileNotFoundException e) {
                 Log.v("Project", "importImages suffered a FileNotFound exception");
                 e.printStackTrace();
@@ -295,7 +309,7 @@ public class Project {
         if (f.canRead()) {
             try (InputStream inputStream = new FileInputStream(f)) {
                 leftImage = BitmapFactory.decodeStream(inputStream);
-                setLoaded(IMG_LEFT);
+                setLoaded(IMG_LEFT, true);
             } catch (FileNotFoundException e) {
                 Log.v("Project", "importImages suffered a FileNotFound exception");
                 e.printStackTrace();

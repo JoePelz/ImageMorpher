@@ -72,6 +72,7 @@ public class EditView extends ImageView implements ProjectUpdateListener {
         bgBackup = model.getImage(Project.IMG_EDIT);
         if (bgBackup == null) {
             bgBitmap = null;
+            super.setImageResource(R.drawable.test);
             return;
         }
         bgBitmap = bgBackup;

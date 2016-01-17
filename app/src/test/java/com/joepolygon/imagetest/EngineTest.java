@@ -76,16 +76,16 @@ public class EngineTest {
         Engine e = new Engine(mMockContext, "default", 10, 0.1f, 2.0f, 0.0f, 512, 512);
         int a = 0x000000;
         int b = 0x888888;
-        assertEquals(0x444444, e.blendColors(a, b, 0.5f));
+        assertEquals(0x444444, e.blendColors(a, b, 1, 2));
         int c = 0x123456;
         int d = 0x345678;
-        assertEquals(0x234567, e.blendColors(c, d, 0.5f));
+        assertEquals(0x234567, e.blendColors(c, d, 1, 2));
         int f = 0x113355;
         int g = 0x557799;
-        assertEquals(0x113355, e.blendColors(f, g, 0.00f));
-        assertEquals(0x224466, e.blendColors(f, g, 0.25f));
-        assertEquals(0x335577, e.blendColors(f, g, 0.50f));
-        assertEquals(0x446688, e.blendColors(f, g, 0.75f));
-        assertEquals(0x557799, e.blendColors(f, g, 1.00f));
+        assertEquals(0x113355, e.blendColors(f, g, 0, 4));
+        assertEquals(0x224466, e.blendColors(f, g, 1, 4));
+        assertEquals(0x335577, e.blendColors(f, g, 2, 4));
+        assertEquals(0x446688, e.blendColors(f, g, 3, 4));
+        assertEquals(0x557799, e.blendColors(f, g, 4, 4));
     }
 }

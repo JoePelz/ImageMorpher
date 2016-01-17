@@ -62,10 +62,10 @@ public class Engine {
         this.width = width;
         this.height = height;
         Project p = new Project(app);
-        if (!p.isLeftEmpty()) {
+        if (p.isLeftLoaded()) {
             imgA = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_LEFT), 512, 512);
         }
-        if (!p.isRightEmpty()) {
+        if (p.isRightLoaded()) {
             imgB = ThumbnailUtils.extractThumbnail(p.getImage(Project.IMG_RIGHT), 512, 512);
         }
         pixelsA = new int[width * height];

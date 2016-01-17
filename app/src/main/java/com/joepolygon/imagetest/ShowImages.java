@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -61,7 +62,7 @@ public class ShowImages extends AppCompatActivity {
         imgLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (model.isLeftEmpty() || model.getEditImage() == Project.IMG_LEFT) {
+                if (!model.isLeftLoaded() || model.getEditImage() == Project.IMG_LEFT) {
                     selectImage(SELECT_PHOTO_LEFT);
                 } else {
                     model.setEditImage(Project.IMG_LEFT);
@@ -73,7 +74,7 @@ public class ShowImages extends AppCompatActivity {
         imgRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (model.isRightEmpty() || model.getEditImage() == Project.IMG_RIGHT) {
+                if (!model.isRightLoaded() || model.getEditImage() == Project.IMG_RIGHT) {
                     selectImage(SELECT_PHOTO_RIGHT);
                 } else {
                     model.setEditImage(Project.IMG_RIGHT);
@@ -96,23 +97,11 @@ public class ShowImages extends AppCompatActivity {
 
     public void actionSave(View v) {
         //save the current Project object to a file.
-        final Context mainApp = this;
-        final CharSequence[] options = { "default", "Project1", "Project2", "Project3", "Cancel" };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(ShowImages.this);
-        builder.setTitle("Choose Project");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int item) {
-                dialog.dismiss();
-                if (!options[item].equals("Cancel")) {
-                    if (model.saveProject(options[item].toString())) {
-                        Toast.makeText(mainApp, "Project '"+options[item]+"' saved", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-        });
-        builder.show();
+        if (model.saveProject(model.getProject())) {
+            Toast.makeText(this, "Project '"+model.getProject()+"' saved", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Error: Project '"+model.getProject()+"' not saved", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void actionOpen(View v) {
@@ -237,7 +226,7 @@ public class ShowImages extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == MY_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Now user should be able to use camera

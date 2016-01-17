@@ -70,11 +70,12 @@ public class Thumbnail extends ImageView implements ProjectUpdateListener {
         bgBackup = model.getImage(role);
         if (bgBackup == null) {
             bgBitmap = null;
+            super.setImageResource(R.drawable.test);
             return;
         }
         bgBitmap = bgBackup;
         super.setImageBitmap(bgBitmap);
-        model.setLoaded(role);
+        model.setLoaded(role, true);
 
         drawMatrix = getImageMatrix();
         drawMatrix.getValues(matValues);
