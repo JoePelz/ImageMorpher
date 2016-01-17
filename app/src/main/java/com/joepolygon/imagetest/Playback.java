@@ -61,11 +61,11 @@ public class Playback extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             Log.v("Playback", "loadFrame suffered a FileNotFound exception");
             e.printStackTrace();
-            Toast.makeText(this, "Frame " + frameNo + " failed.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Frame " + (frameNo+1) + " failed.", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Log.v("Playback", "loadFrame suffered an IO exception");
             e.printStackTrace();
-            Toast.makeText(this, "Frame " + frameNo + " failed.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Frame " + (frameNo+1) + " failed.", Toast.LENGTH_SHORT).show();
         }
     }
 

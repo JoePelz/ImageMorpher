@@ -273,14 +273,26 @@ public class Engine {
         return success;
     }
 
+    public void clearFrames() {
+        File frameFolder = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RenderSettings.RENDER_FOLDER);
+        File[] frameFolderContents = frameFolder.listFiles();
+        for (File f : frameFolderContents) {
+            f.delete();
+        }
+    }
+
     public void render() {
         Bitmap frame;
         Log.v("Engine", "Frames to write: " + frames);
 
+
+        //generate vector maps
         generateMapForSrcPoints();
         generateMapForDstPoints();
+        Log.v("Engine", "Generating vector maps complete.");
 
-        Log.v("Engine", "Generating vector maps complete. building frames.");
+        clearFrames();
+        Log.v("Engine", "Old frames deleted. Generating new frames.");
 
         for(int i = 0; i < frames; i++) {
             //frames == 5; i == [0..4]

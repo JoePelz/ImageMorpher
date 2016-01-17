@@ -85,6 +85,9 @@ public class ShowImages extends AppCompatActivity {
     }
 
     public void build(View v) {
+        //Save, before switching screens
+        actionSave(v);
+
         Intent intent = new Intent(this, RenderSettings.class);
         //SeekBar seekBar  = (SeekBar) findViewById(R.id.seekBar);
         //intent.putExtra("numFrames", seekBar.getProgress());

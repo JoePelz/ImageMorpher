@@ -130,6 +130,7 @@ public class Project {
     }
 
     public boolean openProject(String name) {
+        boolean result = false;
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name);
         if (!f.isDirectory()) {
             f.mkdir();
@@ -143,13 +144,13 @@ public class Project {
                 importImages();
                 loadFromFile(is);
                 Log.v("Project", "Importing lines...");
+                result = true;
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;
             }
         }
         fireUpdate();
-        return true;
+        return result;
     }
 
     public String getProject() {

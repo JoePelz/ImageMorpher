@@ -144,9 +144,21 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         startActivity(intent);
     }
 
+    public int getNumFramesRendered() {
+        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RENDER_FOLDER );
+        if (f.isDirectory() && f.canRead()) {
+            return f.list().length;
+        } else {
+            return 0;
+        }
+    }
+
     public void updateProgressMessage() {
-        int i = pb.getProgress() + 2;
-        int n = pb.getMax() + 2;
+        pb.setMax(frames);
+        int rendered = getNumFramesRendered();
+        pb.setProgress(Math.min(pb.getMax(), rendered));
+        int i = rendered;
+        int n = pb.getMax();
         int ratio = (i * 100) / n;
         String temp = String.format("Progress: %d / %d (%d%%)", i, n, ratio);
         progressMessage.setText(temp);
@@ -216,7 +228,6 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         if ((frames-2) <= sb.getMax()) {
             sb.setProgress(frames - 2);
         }
-        pb.setMax(frames - 2);
         updateProgressMessage();
     }
     public void setA(float dA) {
