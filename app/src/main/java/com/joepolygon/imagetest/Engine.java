@@ -185,38 +185,38 @@ public class Engine {
         }
     }
 
-    public int blendColors(int from, int to, float ratio) {
+    public int blendColors(int from, int to, int num, int denom) {
         //TODO: experiment with blending over HSL instead of RGB
         int result;
         int fr = (from & 0x0000FF);
         int fg = (from & 0x00FF00) >> 8;
         int fb = (from & 0xFF0000) >> 16;
-        int tr = to & 0x0000ff;
+        int tr = (to & 0x0000ff);
         int tg = (to & 0x00ff00) >> 8;
         int tb = (to & 0xff0000) >> 16;
-        result  =  (int)(fr + (tr - fr) * ratio);
-        result += ((int)(fg + (tg - fg) * ratio)) << 8;
-        result += ((int)(fb + (tb - fb) * ratio)) << 16;
+        result  = (fr + (tr - fr) * num / denom);
+        result += (fg + (tg - fg) * num / denom) << 8;
+        result += (fb + (tb - fb) * num / denom) << 16;
 
         return result;
     }
 
-    public Bitmap generateImage(float t) {
-        if (t == 0.0f) {
+    public Bitmap generateImage(int num, int denom) {
+        if (num == 0) {
             return imgA;
-        } else if (t == 1.0f) {
+        } else if (num == denom) {
             return imgB;
-        } else if (t < 0.0f || t > 1.0f) {
-            throw new InvalidParameterException("t must be between 0 and 1 inclusive.");
+        } else if (num < 0 || num > denom) {
+            throw new InvalidParameterException("numerator must be between 0 and the denominator inclusive.");
         }
         Bitmap result = null;
-        //t is between 0 and 1.
+        //num is between 0 and the denominator.
         //FWD = generate t_percent from A + vectors
         //BWD = generate (1-t_percent) from B + vectors
         //generate t_percent color shift from FWD to BWD
 
 
-        Log.v("Engine", "Generating frame t=" + t);
+        Log.v("Engine", "Generating frame t=" + num + "/" + denom);
 
 
         //placeholder
@@ -224,8 +224,33 @@ public class Engine {
         imgA.getPixels(pixelsA, 0, width, 0, 0, width, height);
         imgB.getPixels(pixelsB, 0, width, 0, 0, width, height);
 
+        int offsetAX;
+        int offsetAY;
+        int offsetBX;
+        int offsetBY;
+        int Ai;
+        int Bi;
+        int colorA;
+        int colorB;
+
         for(int i = 0; i < pixelsR.length; i++) {
-            pixelsR[i] = blendColors(pixelsA[i], pixelsB[i], t);
+            offsetAX = forward[i * 2] * num / denom;
+            offsetAY = forward[i * 2 + 1] * num / denom;
+            offsetBX = backward[i * 2] * (denom - num) / denom;
+            offsetBY = backward[i * 2] * (denom - num) / denom;
+            Ai = i + width * offsetAY + offsetAX;
+            Bi = i + width * offsetBY + offsetBX;
+            if (Ai < 0 || Ai >= pixelsA.length) {
+                colorA = 0x000000;
+            } else {
+                colorA = pixelsA[Ai];
+            }
+            if (Bi < 0 || Bi >= pixelsB.length) {
+                colorB = 0x000000;
+            } else {
+                colorB = pixelsB[Bi];
+            }
+            pixelsR[i] = blendColors(colorA, colorB, num, denom);
         }
 
         result.setPixels(pixelsR, 0, width, 0, 0, width, height);
@@ -249,13 +274,17 @@ public class Engine {
     }
 
     public void render() {
-        float t;
         Bitmap frame;
         Log.v("Engine", "Frames to write: " + frames);
+
+        generateMapForSrcPoints();
+        generateMapForDstPoints();
+
+        Log.v("Engine", "Generating vector maps complete. building frames.");
+
         for(int i = 0; i < frames; i++) {
             //frames == 5; i == [0..4]
-            t = (float)i / (frames - 1.0f); // 0/4,  1/4,  2/4,  3/4,  4/4
-            frame = generateImage(t);
+            frame = generateImage(i, frames-1);
             saveFrame(frame, i);
         }
     }

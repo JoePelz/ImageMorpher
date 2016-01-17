@@ -29,9 +29,9 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     private String projectName;
 
     private int frames;
-    private double a;
-    private double b;
-    private double P;
+    private float a;
+    private float b;
+    private float P;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,9 +87,9 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         try {
             JSONObject json = new JSONObject(jsonData);
             setFrames(json.getInt("frames"));
-            setA(json.getDouble("a"));
-            setB(json.getDouble("b"));
-            setP(json.getDouble("P"));
+            setA((float)json.getDouble("a"));
+            setB((float)json.getDouble("b"));
+            setP((float)json.getDouble("P"));
         } catch (JSONException e) {
             Log.v("RenderSettings", "restoreProject failed with a JSON Exception: " + e.getMessage());
             return false;
@@ -133,7 +133,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         saveProject();
 
         //start generating frames
-        Engine e = new Engine(this, projectName, 3, 0.01f, 2.0f, 0.0f, 512, 512);
+        Engine e = new Engine(this, projectName, frames, a, b, P, 512, 512);
         e.render();
     }
 
@@ -162,13 +162,13 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
                 setFrames(Integer.parseInt(text));
                 break;
             case "a":
-                setA(Double.parseDouble(text));
+                setA(Float.parseFloat(text));
                 break;
             case "b":
-                setB(Double.parseDouble(text));
+                setB(Float.parseFloat(text));
                 break;
             case "P":
-                setP(Double.parseDouble(text));
+                setP(Float.parseFloat(text));
                 break;
             default:
                 return false;
@@ -188,15 +188,15 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
                 break;
             case "a":
                 //Log.v("RenderSettings", "'a' seekbar changed");
-                setA((seekBar.getProgress() + 1) / 1000.0);
+                setA((seekBar.getProgress() + 1) / 1000.0f);
                 break;
             case "b":
                 //Log.v("RenderSettings", "'b' seekbar changed");
-                setB(seekBar.getProgress() / 100.0 + 1.0);
+                setB(seekBar.getProgress() / 100.0f + 1.0f);
                 break;
             case "P":
                 //Log.v("RenderSettings", "'P' seekbar changed");
-                setP(seekBar.getProgress() / 100.0);
+                setP(seekBar.getProgress() / 100.0f);
                 break;
             default:
                 Log.v("RenderSettings", "unknown seekbar changed.");
@@ -219,13 +219,13 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         pb.setMax(frames - 2);
         updateProgressMessage();
     }
-    public void setA(double dA) {
+    public void setA(float dA) {
         EditText field = (EditText) findViewById(R.id.valA);
         SeekBar sb = (SeekBar) findViewById(R.id.seekA);
 
         a = dA;
         if (a <= 0) {
-            a = 0.001;
+            a = 0.001f;
         }
 
         field.setText(String.valueOf(a));
@@ -233,15 +233,15 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)(a * 1000 - 1));
         }
     }
-    public void setB(double dB) {
+    public void setB(float dB) {
         EditText field = (EditText) findViewById(R.id.valB);
         SeekBar  sb = (SeekBar) findViewById(R.id.seekB);
 
         b = dB;
         if (b < 1) {
-            b = 1.0;
+            b = 1.0f;
         } else if (b > 2) {
-            b = 2.0;
+            b = 2.0f;
         }
 
         field.setText(String.valueOf(b));
@@ -250,15 +250,15 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)((b - 1) * 100));
         }
     }
-    public void setP(double dP) {
+    public void setP(float dP) {
         EditText field = (EditText) findViewById(R.id.valP);
         SeekBar sb = (SeekBar) findViewById(R.id.seekP);
 
         P = dP;
         if (P < 0) {
-            P = 0.0;
+            P = 0.0f;
         } else if (P > 1) {
-            P = 1.0;
+            P = 1.0f;
         }
 
         field.setText(String.valueOf(P));
