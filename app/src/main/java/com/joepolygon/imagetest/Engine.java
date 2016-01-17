@@ -237,7 +237,7 @@ public class Engine {
             offsetAX = forward[i * 2] * num / denom;
             offsetAY = forward[i * 2 + 1] * num / denom;
             offsetBX = backward[i * 2] * (denom - num) / denom;
-            offsetBY = backward[i * 2] * (denom - num) / denom;
+            offsetBY = backward[i * 2 + 1] * (denom - num) / denom;
             Ai = i + width * offsetAY + offsetAX;
             Bi = i + width * offsetBY + offsetBX;
             if (Ai < 0 || Ai >= pixelsA.length) {
