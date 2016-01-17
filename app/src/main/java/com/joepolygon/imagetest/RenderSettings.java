@@ -29,10 +29,10 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     private TextView progressMessage;
     private String projectName;
 
-    private int frames;
-    private float a;
-    private float b;
-    private float P;
+    private int frames = 50;
+    private float a = 0.03f;
+    private float b = 1.10f;
+    private float P = 0.00f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

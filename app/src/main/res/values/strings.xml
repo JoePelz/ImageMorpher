@@ -14,7 +14,7 @@
     <string name="settings_weights_a">Small value added, to prevent division by 0. Larger values blur the warp. a &gt; 0</string>
     <string name="settings_weights_a_default">0.03</string>
     <string name="settings_weights_b">Distance falloff exponent. Larger numbers result in tighter warps. 1 &lt;= b &lt;= 2</string>
-    <string name="settings_weights_b_default">2.0</string>
+    <string name="settings_weights_b_default">1.1</string>
     <string name="settings_weights_p">Line length effect. Non-zero values will cause the length of a control line to affect it\'s influence radius. 0 &lt;= P &lt;= 1</string>
     <string name="settings_weights_p_default">0.0</string>
     <string name="settings_btnRender">Render frames</string>

@@ -24,9 +24,9 @@ class Engine {
     private Bitmap imgB;
     private final int[] pixelsA, pixelsB, pixelsR;
     private final String projectName;
-    private final int frames;
     private final int width;
     private final int height;
+    private final int frames;
     /** Small value added to prevent division by 0. */
     private final float a;
     /** Distance falloff exponent. */
@@ -143,7 +143,7 @@ class Engine {
             dP[i] = findEquivalentPoint(A, B, x, y);
             dP[i].x -= x; //now relative to (x, 0)
             dP[i].y -= y; //now relative to (x, y)
-            W[i] = weight(A.length(), A.distanceFromLinePts(x, y));
+            W[i] = weight(A.length(), A.distanceFromLine(x, y));
             //multiply by weight
             dPSum.x += dP[i].x * W[i];
             dPSum.y += dP[i].y * W[i];
@@ -189,17 +189,16 @@ class Engine {
     public int blendColors(int from, int to, int num, int denom) {
         //TODO: experiment with blending over HSL instead of RGB
         int result;
-        int fr = (from & 0x0000FF);
+        int fb = (from & 0x0000FF);
         int fg = (from & 0x00FF00) >> 8;
-        int fb = (from & 0xFF0000) >> 16;
-        int tr = (to & 0x0000ff);
+        int fr = (from & 0xFF0000) >> 16;
+        int tb = (to & 0x0000ff);
         int tg = (to & 0x00ff00) >> 8;
-        int tb = (to & 0xff0000) >> 16;
-        result  = (fr + (tr - fr) * num / denom);
+        int tr = (to & 0xff0000) >> 16;
+        result  = (fb + (tb - fb) * num / denom);
         result += (fg + (tg - fg) * num / denom) << 8;
-        result += (fb + (tb - fb) * num / denom) << 16;
-
-        return result;
+        result += (fr + (tr - fr) * num / denom) << 16;
+        return result | 0xFF000000; //white alpha
     }
 
     private Bitmap generateImage(int num, int denom) {
@@ -210,18 +209,15 @@ class Engine {
         } else if (num < 0 || num > denom) {
             throw new InvalidParameterException("numerator must be between 0 and the denominator inclusive.");
         }
-        Bitmap result;
         //num is between 0 and the denominator.
         //FWD = generate t_percent from A + vectors
         //BWD = generate (1-t_percent) from B + vectors
         //generate t_percent color shift from FWD to BWD
 
-
         Log.v("Engine", "Generating frame t=" + num + "/" + denom);
 
-
         //placeholder
-        result = Bitmap.createBitmap(width, height, imgA.getConfig());
+        //result = Bitmap.createBitmap(width, height, imgA.getConfig());
         imgA.getPixels(pixelsA, 0, width, 0, 0, width, height);
         imgB.getPixels(pixelsB, 0, width, 0, 0, width, height);
 
@@ -254,8 +250,7 @@ class Engine {
             pixelsR[i] = blendColors(colorA, colorB, num, denom);
         }
 
-        result.setPixels(pixelsR, 0, width, 0, 0, width, height);
-        return result;
+        return Bitmap.createBitmap(pixelsR, width, height, Bitmap.Config.ARGB_8888);
     }
 
     private boolean saveFrame(Bitmap image, int frameNo) {

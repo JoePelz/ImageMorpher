@@ -119,7 +119,7 @@
                     android:id="@+id/seekB"
                     android:layout_gravity="center_horizontal"
                     android:max="100"
-                    android:progress="100"
+                    android:progress="10"
                     android:tag="b" />
 
             </LinearLayout>

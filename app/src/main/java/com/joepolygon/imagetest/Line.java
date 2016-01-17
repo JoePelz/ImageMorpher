@@ -41,13 +41,38 @@ class Line implements Serializable{
     }
 
     public float length() {
-        return (float)Math.hypot(pts[2]-pts[0], pts[3]-pts[1]);
+        return (float)Math.hypot(pts[2] - pts[0], pts[3] - pts[1]);
     }
 
     public float distanceFromLinePts(float x, float y) {
         float distanceToA = getDistSquared(pts[0], pts[1], x, y);
         float distanceToB = getDistSquared(pts[2], pts[3], x, y);
         return (float) Math.sqrt(Math.min(distanceToA, distanceToB));
+    }
+
+    public float distanceFromLine(float x, float y) {
+        //get percent along line
+        //if percent < 0
+        //  return dist to A
+        //if percent > 1
+        //  return dist to B
+        //else
+        //  return dist to line
+        float dx = pts[2]-pts[0];
+        float dy = pts[3]-pts[1];
+        float percent = ((dx)*(x-pts[0]) + (dy)*(y-pts[1]))
+                / (dx*dx + dy*dy);
+        if (percent <= 0) {
+            return (float)Math.sqrt(getDistSquared(pts[0], pts[1], x, y));
+        } else if (percent >= 1) {
+            return (float)Math.sqrt(getDistSquared(pts[2], pts[3], x, y));
+        } else {
+            x -= pts[0];
+            y -= pts[1];
+            VectorF XP = new VectorF(dx - x, dy - y);
+            VectorF n = new VectorF(-dy, dx);
+            return Math.abs(XP.projectionLength(n));
+        }
     }
 
     public int getClosestVertex(float x, float y) {
