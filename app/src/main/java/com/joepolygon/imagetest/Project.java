@@ -142,12 +142,15 @@ public class Project {
             try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
                 Log.v("Project", "Importing images...");
                 importImages();
-                loadFromFile(is);
                 Log.v("Project", "Importing lines...");
+                loadFromFile(is);
                 result = true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            Log.v("Project", "Project " + name + " doesn't exist. Cannot open.");
+            result = true;
         }
         fireUpdate();
         return result;
@@ -274,28 +277,32 @@ public class Project {
     public void importImages() {
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
         rightImage = null;
-        try (InputStream inputStream = new FileInputStream(f)) {
-            rightImage = BitmapFactory.decodeStream(inputStream);
-            setLoaded(IMG_RIGHT);
-        } catch (FileNotFoundException e) {
-            Log.v("Project", "importImages suffered a FileNotFound exception");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.v("Project", "importImages suffered an IO exception");
-            e.printStackTrace();
+        if (f.canRead()) {
+            try (InputStream inputStream = new FileInputStream(f)) {
+                rightImage = BitmapFactory.decodeStream(inputStream);
+                setLoaded(IMG_RIGHT);
+            } catch (FileNotFoundException e) {
+                Log.v("Project", "importImages suffered a FileNotFound exception");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.v("Project", "importImages suffered an IO exception");
+                e.printStackTrace();
+            }
         }
 
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");
         leftImage = null;
-        try (InputStream inputStream = new FileInputStream(f)) {
-            leftImage = BitmapFactory.decodeStream(inputStream);
-            setLoaded(IMG_LEFT);
-        } catch (FileNotFoundException e) {
-            Log.v("Project", "importImages suffered a FileNotFound exception");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.v("Project", "importImages suffered an IO exception");
-            e.printStackTrace();
+        if (f.canRead()) {
+            try (InputStream inputStream = new FileInputStream(f)) {
+                leftImage = BitmapFactory.decodeStream(inputStream);
+                setLoaded(IMG_LEFT);
+            } catch (FileNotFoundException e) {
+                Log.v("Project", "importImages suffered a FileNotFound exception");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.v("Project", "importImages suffered an IO exception");
+                e.printStackTrace();
+            }
         }
         bImagesDirty = false;
     }

@@ -56,7 +56,6 @@ public class ShowImages extends AppCompatActivity {
         model.addUpdateListener(imgEdit);
 
         model.loadState(savedInstanceState);
-        model.importImages();
         updateImages();
 
         imgLeft.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +85,7 @@ public class ShowImages extends AppCompatActivity {
 
     public void build(View v) {
         //Save, before switching screens
-        actionSave(v);
+        model.saveProject(model.getProject());
 
         Intent intent = new Intent(this, RenderSettings.class);
         //SeekBar seekBar  = (SeekBar) findViewById(R.id.seekBar);
@@ -130,7 +129,6 @@ public class ShowImages extends AppCompatActivity {
                 if (!options[item].equals("Cancel")) {
                     if (model.openProject(options[item].toString())) {
                         Toast.makeText(mainApp, "Project '" + options[item] + "' opened", Toast.LENGTH_LONG).show();
-                        model.importImages();
                         Project.writeProjectName(mainApp, options[item].toString());
                         updateImages();
                     }

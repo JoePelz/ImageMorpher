@@ -1,13 +1,16 @@
 package com.joepolygon.imagetest;
 
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -20,9 +23,12 @@ import java.io.InputStream;
 
 public class Playback extends AppCompatActivity {
     String projectName;
+    int frameCount;
     int frameLoaded;
+    int downX, downFrame;
     ImageView imgView;
     Bitmap frame;
+    int width, height;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +46,40 @@ public class Playback extends AppCompatActivity {
 
 
         projectName = Project.readProjectName(this);
+        frameCount = RenderSettings.getNumFramesRendered(this, projectName);
         initializePlayback();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+        int width = dm.widthPixels;
+        int posX;
+        int rangePixels, rangeFrames;
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                downX = (int)event.getX();
+                downFrame = frameLoaded;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                //TODO:  if currently playing back, stop. Or ignore this.
+                posX = (int)event.getX();
+                if (posX > downX) {
+                    rangePixels = width - downX;
+                    rangeFrames = frameCount - downFrame;
+                    loadFrame((posX - downX) * rangeFrames / rangePixels + downFrame);
+                } else {
+                    rangePixels = downX;
+                    rangeFrames = downFrame;
+                    loadFrame(posX * rangeFrames / rangePixels);
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     public void loadFrame(int frameNo) {
@@ -50,13 +89,15 @@ public class Playback extends AppCompatActivity {
                         , projectName + File.separator
                         + RenderSettings.RENDER_FOLDER + File.separator
                         + fileName);
-        Log.v("Playback", "loadFrame: loading from " + f.getAbsolutePath());
+        if (frameNo >= frameCount || frameNo < 0) {
+            return;
+        }
+        //Log.v("Playback", "loadFrame: loading from " + f.getAbsolutePath());
         try (InputStream inputStream = new FileInputStream(f)) {
             frame = BitmapFactory.decodeStream(inputStream);
             if (frame != null) {
                 imgView.setImageBitmap(frame);
                 frameLoaded = frameNo;
-            } else {
             }
         } catch (FileNotFoundException e) {
             Log.v("Playback", "loadFrame suffered a FileNotFound exception");

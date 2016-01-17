@@ -1,5 +1,6 @@
 package com.joepolygon.imagetest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -135,6 +136,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         //start generating frames
         Engine e = new Engine(this, projectName, frames, a, b, P, 512, 512);
         e.render();
+        updateProgressMessage();
     }
 
     public void onView(View v) {
@@ -144,8 +146,8 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         startActivity(intent);
     }
 
-    public int getNumFramesRendered() {
-        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RENDER_FOLDER );
+    public static int getNumFramesRendered(Context app, String project) {
+        File f = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), project + File.separator + RENDER_FOLDER );
         if (f.isDirectory() && f.canRead()) {
             return f.list().length;
         } else {
@@ -155,12 +157,11 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
 
     public void updateProgressMessage() {
         pb.setMax(frames);
-        int rendered = getNumFramesRendered();
+        int rendered = getNumFramesRendered(this, projectName);
         pb.setProgress(Math.min(pb.getMax(), rendered));
-        int i = rendered;
         int n = pb.getMax();
-        int ratio = (i * 100) / n;
-        String temp = String.format("Progress: %d / %d (%d%%)", i, n, ratio);
+        int ratio = (rendered * 100) / n;
+        String temp = String.format("Progress: %d / %d (%d%%)", rendered, n, ratio);
         progressMessage.setText(temp);
     }
 
