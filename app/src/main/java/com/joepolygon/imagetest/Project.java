@@ -134,12 +134,15 @@ public class Project {
         if (!f.isDirectory()) {
             return false;
         }
+        Log.v("Project", "project directory opened.");
         projectName = name;
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name + File.separator + "data.prj");
         if (f.isFile()) {
             try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(f))) {
+                Log.v("Project", "Importing images...");
                 importImages();
                 loadFromFile(is);
+                Log.v("Project", "Importing lines...");
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -208,24 +211,6 @@ public class Project {
         fireUpdate();
     }
 
-    /*   //unused...
-    public boolean removeLine(Line l) {
-        int index;
-        if (imgToEdit == IMG_LEFT) {
-            index = leftLines.indexOf(l);
-        } else {
-            index = rightLines.indexOf(l);
-        }
-        if (index == -1) {
-            return false;
-        }
-        leftLines.remove(index);
-        rightLines.remove(index);
-        fireUpdate();
-        return true;
-    }
-    */
-
     public boolean removeSelected() {
         if (selectedLineIndex == -1) {
             return false;
@@ -289,6 +274,7 @@ public class Project {
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
         try (InputStream inputStream = new FileInputStream(f)) {
             rightImage = BitmapFactory.decodeStream(inputStream);
+            setLoaded(IMG_RIGHT);
         } catch (FileNotFoundException e) {
             Log.v("Project", "importImages suffered a FileNotFound exception");
             Log.v("Project", "importImagesRight couldn't open " + f.getAbsolutePath());
@@ -301,6 +287,7 @@ public class Project {
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");
         try (InputStream inputStream = new FileInputStream(f)) {
             leftImage = BitmapFactory.decodeStream(inputStream);
+            setLoaded(IMG_LEFT);
         } catch (FileNotFoundException e) {
             Log.v("Project", "importImages suffered a FileNotFound exception");
             e.printStackTrace();

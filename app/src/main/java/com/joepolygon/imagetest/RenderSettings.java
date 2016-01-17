@@ -23,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, TextView.OnEditorActionListener {
+    public static final String RENDER_FOLDER = "frames";
     private ProgressBar pb;
     private TextView progressMessage;
     private String projectName;
@@ -122,9 +123,9 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     public void onRender(View v) {
         Log.v("RenderSettings", "Render clicked");
         //create folder "frames"
-        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "frames" );
-        if (!f.mkdir() || !f.isDirectory()) {
-            Log.e("RenderSettings", "onRender making the frames folder failed.");
+        File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RENDER_FOLDER );
+        if (!f.mkdir() && !f.isDirectory()) {
+            Log.e("RenderSettings", "onRender making the render folder(\""+RENDER_FOLDER+"\") failed.");
             return;
         }
 
@@ -132,7 +133,8 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         saveProject();
 
         //start generating frames
-
+        Engine e = new Engine(this, projectName, 3, 0.01f, 2.0f, 0.0f, 512, 512);
+        e.render();
     }
 
     public void onView(View v) {
