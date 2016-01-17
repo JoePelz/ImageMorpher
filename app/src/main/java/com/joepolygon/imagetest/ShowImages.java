@@ -115,10 +115,6 @@ public class ShowImages extends AppCompatActivity {
 
     public void actionOpen(View v) {
         //replace the current Project object.
-        if (model.openProject("pickles")) {
-            Toast.makeText(this, "Project 'pickles' opened", Toast.LENGTH_LONG).show();
-        }
-
         final Context mainApp = this;
         final CharSequence[] options = { "default", "Project1", "Project2", "Project3", "Cancel" };
 

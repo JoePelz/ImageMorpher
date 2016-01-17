@@ -132,7 +132,7 @@ public class Project {
     public boolean openProject(String name) {
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name);
         if (!f.isDirectory()) {
-            return false;
+            f.mkdir();
         }
         Log.v("Project", "project directory opened.");
         projectName = name;
@@ -272,12 +272,12 @@ public class Project {
 
     public void importImages() {
         File f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "rightImage.jpg");
+        rightImage = null;
         try (InputStream inputStream = new FileInputStream(f)) {
             rightImage = BitmapFactory.decodeStream(inputStream);
             setLoaded(IMG_RIGHT);
         } catch (FileNotFoundException e) {
             Log.v("Project", "importImages suffered a FileNotFound exception");
-            Log.v("Project", "importImagesRight couldn't open " + f.getAbsolutePath());
             e.printStackTrace();
         } catch (IOException e) {
             Log.v("Project", "importImages suffered an IO exception");
@@ -285,6 +285,7 @@ public class Project {
         }
 
         f = new File(appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "leftImage.jpg");
+        leftImage = null;
         try (InputStream inputStream = new FileInputStream(f)) {
             leftImage = BitmapFactory.decodeStream(inputStream);
             setLoaded(IMG_LEFT);
@@ -375,6 +376,10 @@ public class Project {
             e.printStackTrace();
         }
         if (data == null) {
+            selectedLineIndex = -1;
+            imgToEdit = IMG_LEFT;
+            leftLines = new ArrayList<>();
+            rightLines = new ArrayList<>();
             return false;
         }
 
