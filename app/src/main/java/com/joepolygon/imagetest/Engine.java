@@ -42,6 +42,8 @@ class Engine {
 
     /** Forward offsets to find the origin of a point in the destination. */
     private int[] forward;
+    private int[] forwardX;
+    private int[] forwardY;
     /** Backwards offsets to find the origin of a point in the source. */
     private int[] backward;
 
@@ -156,6 +158,8 @@ class Engine {
         return new Point((int)dPSum.x, (int)dPSum.y);
     }
 
+
+
     private void generateMapForDstPoints() {
         int size = width * height * 2;
         Point offset;
@@ -169,6 +173,155 @@ class Engine {
             forward[i] = offset.x;
             forward[i+1] = offset.y;
         }
+    }
+
+    private int interpolate(int left, int right, int num, int denom) {
+        return left + (right - left) * num / denom;
+    }
+
+    public void generateMapForDstPoints2() {
+        forward = new int[width*height*2];
+        int factor = 3;
+        int remainder = 0;
+        int i;
+        Point offset;
+        int x, y;
+        /*
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+         */
+
+        //A -- calculate key points
+        for (y = 0; y < height; y += factor) {
+            for (x = 0; x < width; x += factor) {
+                i = (y*width + x) * 2;
+                //calculate value of key points
+                offset = vectorForPoint(dsts, srcs, x, y);
+                forward[i] = offset.x;
+                forward[i + 1] = offset.y;
+            }
+        }
+
+        /*
+        A _ _ A _
+        _ _ _ _ _
+        _ _ _ _ _
+        A _ _ A _
+        _ _ _ _ _
+         */
+
+        //B -- calculate rows connecting
+        for (y = 0; y < height; y += factor) {
+            for (x = 0; x < width; x++) {
+                remainder = x % factor;
+                if (remainder == 0) {
+                    continue;
+                }
+                i = (y*width + x) * 2;
+
+                if (x + factor - remainder >= width) {
+                    //use the left value
+                    forward[i    ] = forward[i - remainder * 2];
+                    forward[i + 1] = forward[i - remainder * 2 + 1];
+                } else {
+                    //interpolate between left and right
+                    forward[i    ] = interpolate(forward[i - remainder * 2  ], forward[i + 2*(factor-remainder)  ], remainder, factor);
+                    forward[i + 1] = interpolate(forward[i - remainder * 2+1], forward[i + 2*(factor-remainder)+1], remainder, factor);
+                }
+            }
+        }
+
+        /*
+        A B B A B
+        _ _ _ _ _
+        _ _ _ _ _
+        A B B A B
+        _ _ _ _ _
+         */
+
+        //C -- calculate columns connecting
+        for (y = 0; y < height; y++) {
+            remainder = y % factor;
+            if (remainder == 0) {
+                continue;
+            }
+            for (x = 0; x < width; x += factor) {
+                i = (y*width + x) * 2;
+
+                if (y + factor - remainder >= height) {
+                    //use the top value
+                    forward[i    ] = forward[i - remainder * 2 * width];
+                    forward[i + 1] = forward[i - remainder * 2 * width + 1];
+                } else {
+                    //interpolate between top and bottom values
+                    //top is forward[i - remainder * 2 * width]
+                    //   and forward[i - remainder * 2 * width + 1]
+                    //bottom is forward[i + (factor - remainder)*2*width]
+                    //bottom is forward[i + (factor - remainder)*2*width + 1]
+                    forward[i] = interpolate(
+                            forward[i - remainder * 2 * width],
+                            forward[i + (factor - remainder)*2*width],
+                            remainder,
+                            factor);
+                    forward[i+1] = interpolate(
+                            forward[i - remainder * 2 * width + 1],
+                            forward[i + (factor - remainder)*2*width + 1],
+                            remainder,
+                            factor);
+                }
+            }
+        }
+
+        /*
+        A B B A B
+        C _ _ C _
+        C _ _ C _
+        A B B A B
+        C _ _ C _
+         */
+
+        //D -- calculate remaining points
+        for (y = 0; y < height; y++) {
+            int remY = y % factor;
+            if (remY == 0) {
+                continue;
+            }
+            for (x = 0; x < width; x++) {
+                int remX = x % factor;
+                if (remX == 0) {
+                    continue;
+                }
+                i = (y*width + x) * 2;
+                if (x - remX + factor >= width && y - remY + factor >= height) {
+                    //bottom right corner of diagram
+                    forward[i    ] = forward[i - 2];
+                    forward[i + 1] = forward[i - 1];
+                } else if (x - remX + factor >= width) {
+                    //right edge of diagram
+                    //top is forward[i - remY*2*width]
+                    //btm is forward[i + (factor - remY)*2*width]
+                    forward[i    ] = interpolate(forward[i - remY*2*width], forward[i + (factor - remY)*2*width], remainder, factor);
+                    forward[i + 1] = interpolate(forward[i - remY*2*width + 1], forward[i + (factor - remY)*2*width + 1], remainder, factor);
+                } else {
+                    //bottom edge of diagram and interiors of diagram
+                    //left  is forward[i - remX*2]
+                    //right is forward[i + (factor-remX)*2]
+                    forward[i    ] = interpolate(forward[i-remX*2], forward[i+(factor-remX)*2], remainder, factor);
+                    forward[i + 1] = interpolate(forward[i-remX*2+1], forward[i+(factor-remX)*2+1], remainder, factor);
+                }
+            }
+        }
+
+        /*
+        A B B A B
+        C D D C D
+        C D D C D
+        A B B A B
+        C D D C D
+         */
     }
 
     private void generateMapForSrcPoints() {
@@ -284,7 +437,7 @@ class Engine {
 
         //generate vector maps
         generateMapForSrcPoints();
-        generateMapForDstPoints();
+        generateMapForDstPoints2();
         Log.v("Engine", "Generating vector maps complete.");
 
         clearFrames();

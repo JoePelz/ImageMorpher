@@ -153,6 +153,21 @@ public class VectorFTest {
     }
 
     @Test
+    public void VectorF_distToPointWithOrigin() {
+        VectorF h = new VectorF(3, 0);
+        VectorF v = new VectorF(0, -1);
+        VectorF v2 = new VectorF(0, 1000);
+        VectorF d = new VectorF(-6, -8);
+        float x = 12;
+        float y = 16;
+
+        assertThat(h.distToPoint(x, y, 3, 3), is(-13.0f));
+        assertThat(v.distToPoint(x, y, -2, 5), is(-14.0f));
+        assertThat(v2.distToPoint(x, y, 0, 1000), is(12.0f));
+        assertThat(d.distToPoint(x, y, 3, 4), is(0.0f));
+    }
+
+    @Test
     public void VectorF_distanceAlong() {
         VectorF a = new VectorF(100, 0);
         assertEquals(0.25f, a.distanceAlong(25,  36, 0, 0), 0.00001);

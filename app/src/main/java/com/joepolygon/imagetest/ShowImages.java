@@ -211,7 +211,7 @@ public class ShowImages extends AppCompatActivity {
                     startActivityForResult(intent, origin | PICK_CAMERA);
                 }
                 else if (options[item].equals("Choose from Gallery")) {
-                    Intent intent = new   Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    Intent intent = new   Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, origin | PICK_GALLERY);
                 }
                 else if (options[item].equals("Cancel")) {
