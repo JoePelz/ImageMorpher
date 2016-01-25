@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -33,6 +35,8 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
     private float a = 0.03f;
     private float b = 1.10f;
     private float P = 0.00f;
+
+    private Handler renderMessageHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,12 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         et.setOnEditorActionListener(this);
         et = (EditText) findViewById(R.id.valP);
         et.setOnEditorActionListener(this);
+
+        renderMessageHandler = new Handler() {
+            public void handleMessage (Message msg) {
+                updateProgressMessage();
+            }
+        };
 
         restoreProject();
     }
@@ -133,7 +143,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         saveProject();
 
         //start generating frames
-        Engine e = new Engine(this, projectName, frames, a, b, P, 512, 512);
+        Engine e = new Engine(this, renderMessageHandler, projectName, frames, a, b, P, 512, 512);
         e.render();
         updateProgressMessage();
     }
@@ -153,7 +163,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
-    private void updateProgressMessage() {
+    public void updateProgressMessage() {
         pb.setMax(frames);
         int rendered = getNumFramesRendered(this, projectName);
         pb.setProgress(Math.min(pb.getMax(), rendered));

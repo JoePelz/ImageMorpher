@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -12,6 +15,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -19,10 +30,11 @@ import java.util.ArrayList;
  * Created by Joe on 2016-01-13.
  */
 class Engine {
+    private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
     private final Context app;
     private Bitmap imgA;
     private Bitmap imgB;
-    private final int[] pixelsA, pixelsB, pixelsR;
+    private final int[] pixelsA, pixelsB;
     private final String projectName;
     private final int width;
     private final int height;
@@ -33,12 +45,13 @@ class Engine {
     private final float b;
     /** Influence of line length on magnitude of effect. */
     private final float P;
+    /** The next frame to render. */
+    private int nextFrame;
 
     /** The lines on the src(A) image. */
     private final ArrayList<Line> srcs;
     /** The lines on the dst(B) image. */
     private final ArrayList<Line> dsts;
-
 
     /** Forward offsets to find the origin of a point in the destination. */
     private int[] forwardX;
@@ -46,6 +59,8 @@ class Engine {
     /** Backwards offsets to find the origin of a point in the source. */
     private int[] backwardX;
     private int[] backwardY;
+
+    private Handler msgHandler;
 
     /**
      * Create a new rendering engine.
@@ -55,8 +70,9 @@ class Engine {
      * @param b Controls falloff of the range of effect based on distance from lines. Higher values tighten up effect to only be close to lines.
      * @param P Indicates the effect of line length of range of effect.
      */
-    public Engine(Context app, String project, int frames, float a, float b, float P, int width, int height) {
+    public Engine(Context app, Handler h, String project, int frames, float a, float b, float P, int width, int height) {
         this.app = app;
+        this.msgHandler = h;
         this.projectName = project;
         this.frames = frames;
         this.a = a;
@@ -73,7 +89,6 @@ class Engine {
         }
         pixelsA = new int[width * height];
         pixelsB = new int[width * height];
-        pixelsR = new int[width * height];
 
         srcs = p.getLines(Project.IMG_LEFT);
         dsts = p.getLines(Project.IMG_RIGHT);
@@ -360,7 +375,7 @@ class Engine {
         return result | 0xFF000000; //white alpha
     }
 
-    private Bitmap generateImage(int num, int denom) {
+    private Bitmap generateImage(int num, int denom, int[] pixelsR) {
         if (num == 0) {
             return imgA;
         } else if (num == denom) {
@@ -419,7 +434,6 @@ class Engine {
         try (OutputStream stream = new FileOutputStream(f)) {
             image.compress(Bitmap.CompressFormat.JPEG, 80, stream);
             Log.v("Engine", "saveFrame: Wrote frame " + filename);
-            Log.v("Engine", "saveFrame: Writing to " + f.getAbsolutePath());
             success = true;
         } catch (IOException e) {
             Log.v("Engine", "saveFrame: Couldn't save " + filename);
@@ -442,25 +456,85 @@ class Engine {
 
 
         //generate vector maps
-        generateMapForSrcPoints();
-        generateMapForDstPoints();
+        //generateMapForSrcPoints();
+        //generateMapForDstPoints();
+        //BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(2);
+        //queue.add(new VectorGenerator(0));
+        //queue.add(new VectorGenerator(1));
+        //ThreadPoolExecutor pool = new ThreadPoolExecutor(0, 2, 100, TimeUnit.MILLISECONDS, queue);
+        Thread a = new Thread(new VectorGenerator(0));
+        Thread b = new Thread(new VectorGenerator(1));
+        a.start();
+        b.start();
+        try {
+            a.join();
+        } catch (InterruptedException e) {
+            Log.v("Engine", "Thread A was interrupted.");
+            return;
+        }
+        try {
+            b.join();
+        } catch (InterruptedException e) {
+            Log.v("Engine", "Thread B was interrupted.");
+            return;
+        }
+
         Log.v("Engine", "Generating vector maps complete.");
 
         clearFrames();
         Log.v("Engine", "Old frames deleted. Generating new frames.");
 
-        for(int i = 0; i < frames; i++) {
-            //frames == 5; i == [0..4]
-            frame = generateImage(i, frames-1);
-            saveFrame(frame, i);
+        nextFrame = frames - 1;
+
+        for(int i = 0; i < NUMBER_OF_CORES; i++) {
+            new Thread(new FrameRenderer(msgHandler)).start();
         }
     }
 
-    private class vectorGeneratorSRC implements Runnable {
+    synchronized int getNextFrame() {
+        nextFrame = nextFrame - 1;
+        return nextFrame + 1;
+    }
+
+    private class FrameRenderer implements Runnable {
+        private Handler msgHandler;
+        private int[] pixels;
+
+        FrameRenderer(Handler h) {
+            msgHandler = h;
+            pixels = new int[width*height];
+        }
 
         @Override
         public void run() {
-            generateMapForSrcPoints();
+            Bitmap frame;
+            int frameNum = getNextFrame();
+            while (frameNum >= 0) {
+                frame = generateImage(frameNum, frames-1, pixels);
+                saveFrame(frame, frameNum);
+                Message msg = msgHandler.obtainMessage(7);
+                msgHandler.sendMessage(msg);
+                frameNum = getNextFrame();
+            }
+        }
+    }
+
+    private class VectorGenerator implements Runnable {
+        private int target;
+        VectorGenerator(int target) {
+            this.target = target;
+        }
+
+        @Override
+        public void run() {
+            // Moves the current Thread into the background
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+            if (target == 0) {
+                generateMapForSrcPoints();
+            } else {
+                generateMapForDstPoints();
+            }
         }
     }
 }

@@ -63,11 +63,11 @@ public class Playback extends AppCompatActivity {
                 //TODO:  if currently playing back, stop. Or ignore this.
                 posX = (int)event.getX();
                 if (posX > downX) {
-                    rangePixels = width - downX;
+                    rangePixels = width - downX == 0 ? 1 : width - downX; //to prevent divide-by-zero
                     rangeFrames = frameCount - downFrame;
                     loadFrame((posX - downX) * rangeFrames / rangePixels + downFrame);
                 } else {
-                    rangePixels = downX;
+                    rangePixels = downX == 0 ? 1 : downX; //to prevent divide-by-zero
                     rangeFrames = downFrame;
                     loadFrame(posX * rangeFrames / rangePixels);
                 }
