@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 /**
  * React to the model being updated. Used to invalidate/redraw the thumbnails.

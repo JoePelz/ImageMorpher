@@ -5,7 +5,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.joepolygon.imagetest.Playback"
+    tools:context="com.joepolygon.warpertoy.Playback"
     tools:showIn="@layout/activity_playback"
     android:background="#000000">
 
@@ -33,32 +33,11 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/playback_backward"
-            android:id="@+id/btnBackward"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_weight="1"
-            android:nestedScrollingEnabled="false"
-            android:onClick="onBackward"
-            android:textSize="50sp" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="@string/playback_step_backward"
             android:id="@+id/btnStepBack"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
             android:onClick="onStepBack"
-            android:textSize="50sp" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/playback_stop"
-            android:id="@+id/btnStop"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_weight="1"
-            android:onClick="onStop"
             android:textSize="50sp" />
 
         <Button
@@ -71,15 +50,6 @@
             android:onClick="onStepForward"
             android:textSize="50sp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/playback_forward"
-            android:id="@+id/btnForward"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_weight="1"
-            android:onClick="onForward"
-            android:textSize="50sp" />
     </LinearLayout>
 
 </RelativeLayout>

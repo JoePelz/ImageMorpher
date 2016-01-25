@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 /**
  * 2D Vector represented by two floats. Includes basic manipulation methods.

@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,7 +6,6 @@ import android.media.ThumbnailUtils;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -15,14 +14,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -97,6 +88,7 @@ class Engine {
         scaleLines(); //to match the chosen resolution
     }
 
+    /** scale the control lines from normalized form (0..1) to the actual image dimensions (0..width) (0..height). */
     private void scaleLines() {
         float[] f;
         for (Line l : srcs) {
@@ -115,10 +107,12 @@ class Engine {
         }
     }
 
+    /** Calculate the weight of a point value based on control line length and distance from control line. */
     public float weight(float lineLength, float distance) {
         return (float) Math.pow(Math.pow(lineLength, P) / (a + distance), b);
     }
 
+    /** Given a point (x, y) relative to Line A, where would it be relative to Line B? */
     public PointF findEquivalentPoint(Line A, Line B, int x, int y) {
         PointF equivalent = new PointF();
 
@@ -143,6 +137,7 @@ class Engine {
         return equivalent;
     }
 
+    /** Given two sets of lines, calculate the weighted average point in dsts equivalent to where (x,y) was relative to srcs */
     public Point vectorForPoint(ArrayList<Line> srcs, ArrayList<Line> dsts, int x, int y) {
         Line A;
         Line B;
@@ -173,10 +168,12 @@ class Engine {
         return new Point((int)dPSum.x, (int)dPSum.y);
     }
 
+    /** Given a fraction (num/denom), calculate the value that would be the fractional percentage between left and right. */
     private int interpolate(int left, int right, int num, int denom) {
         return left + (right - left) * num / denom;
     }
 
+    /** Build a map of vectors transforming forward from the original image A towards B */
     public void generateMapForDstPoints() {
         forwardX = new int[width*height];
         forwardY = new int[width*height];
@@ -281,6 +278,7 @@ class Engine {
          */
     }
 
+    /** Build a map of vectors transforming backward from the image B towards image A */
     public void generateMapForSrcPoints() {
         backwardX = new int[width*height];
         backwardY = new int[width*height];
@@ -360,6 +358,7 @@ class Engine {
         }
     }
 
+    /** Calculate the color the given fraction of the way between color from and color to.  Returns full alpha. */
     public int blendColors(int from, int to, int num, int denom) {
         //TODO: experiment with blending over HSL instead of RGB
         int result;
@@ -375,6 +374,9 @@ class Engine {
         return result | 0xFF000000; //white alpha
     }
 
+    /** Generate an image the given fraction (num/denom) percentage of the way
+     * between pixelsA and pixelsB.
+     * Use the given preallocated array to hold the pixels. */
     private Bitmap generateImage(int num, int denom, int[] pixelsR) {
         if (num == 0) {
             return imgA;
@@ -427,6 +429,12 @@ class Engine {
         return Bitmap.createBitmap(pixelsR, width, height, Bitmap.Config.ARGB_8888);
     }
 
+    /**
+     * Save the given image as a file in the render folder.
+     * @param image The image to save
+     * @param frameNo The frame number, to generate the file name from. (%04d)
+     * @return True if saving succeeded.
+     */
     private boolean saveFrame(Bitmap image, int frameNo) {
         String filename = String.format("%04d.jpg", frameNo); //frame count limited to 0..9999
         boolean success = false;
@@ -442,6 +450,9 @@ class Engine {
         return success;
     }
 
+    /**
+     * Delete all existing frames in the render folder.
+     */
     private void clearFrames() {
         File frameFolder = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RenderSettings.RENDER_FOLDER);
         File[] frameFolderContents = frameFolder.listFiles();
@@ -450,18 +461,13 @@ class Engine {
         }
     }
 
+    /**
+     * Delete existing frames and generate all the frames again.  Spawns several threads.
+     */
     public void render() {
         Bitmap frame;
         Log.v("Engine", "Frames to write: " + frames);
 
-
-        //generate vector maps
-        //generateMapForSrcPoints();
-        //generateMapForDstPoints();
-        //BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(2);
-        //queue.add(new VectorGenerator(0));
-        //queue.add(new VectorGenerator(1));
-        //ThreadPoolExecutor pool = new ThreadPoolExecutor(0, 2, 100, TimeUnit.MILLISECONDS, queue);
         Thread a = new Thread(new VectorGenerator(0));
         Thread b = new Thread(new VectorGenerator(1));
         a.start();
@@ -491,11 +497,17 @@ class Engine {
         }
     }
 
+    /**
+     * Return the next frame to render, while decreasing the frame number for future calls.
+     * @return The next frame to render.
+     */
     synchronized int getNextFrame() {
-        nextFrame = nextFrame - 1;
-        return nextFrame + 1;
+        return nextFrame--;
     }
 
+    /**
+     * private inner class to render individual frames.
+     */
     private class FrameRenderer implements Runnable {
         private Handler msgHandler;
         private int[] pixels;
@@ -505,6 +517,9 @@ class Engine {
             pixels = new int[width*height];
         }
 
+        /**
+         * Generate images for the frames specified by getNextFrame until a negative value is returned.
+         */
         @Override
         public void run() {
             Bitmap frame;
@@ -519,6 +534,9 @@ class Engine {
         }
     }
 
+    /**
+     * Thread to generate the vectors (imgA->imgB and imgB->imgA) required before image generation.
+     */
     private class VectorGenerator implements Runnable {
         private int target;
         VectorGenerator(int target) {

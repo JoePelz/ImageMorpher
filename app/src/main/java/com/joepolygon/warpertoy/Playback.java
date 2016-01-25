@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 
 import android.graphics.Bitmap;
@@ -43,9 +43,14 @@ public class Playback extends AppCompatActivity {
 
         projectName = Project.readProjectName(this);
         frameCount = RenderSettings.getNumFramesRendered(this, projectName);
-        initializePlayback();
+        loadFrame(0);
     }
 
+    /**
+     * Handle touch events to allow the very slick swipe-animation that plays the warp.
+     * @param event The touch event that triggered this callback
+     * @return True if the event was handled (always returns true)
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         DisplayMetrics dm = new DisplayMetrics();
@@ -78,6 +83,10 @@ public class Playback extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Open the image specified by the given frame number. Looks in the RenderSettings.RENDER_FOLDER for frames.
+     * @param frameNo The frame to load
+     */
     private void loadFrame(int frameNo) {
         Bitmap frame;
         String fileName = String.format("%04d.jpg", frameNo);
@@ -107,30 +116,19 @@ public class Playback extends AppCompatActivity {
         }
     }
 
-    private void initializePlayback() {
-        //load frame 0, if available.
-        Log.v("Playback", "Loading frame 0");
-        loadFrame(0);
-        //
-    }
-
+    /**
+     * GUI callback to step one frame backward
+     * @param v The source of the call
+     */
     public void onStepBack(View v) {
-        loadFrame (frameLoaded - 1);
+        loadFrame(frameLoaded - 1);
     }
 
+    /**
+     * GUI callback to step one frame forward
+     * @param v The source of the call
+     */
     public void onStepForward(View v) {
         loadFrame (frameLoaded + 1);
-    }
-
-    public void onBackward(View v) {
-        onStepBack(v);
-    }
-
-    public void onForward(View v) {
-        onStepForward(v);
-    }
-
-    public void onStop(View v) {
-        //do nothing; play doesn't work yet.
     }
 }

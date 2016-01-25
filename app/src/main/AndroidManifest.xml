@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.joepolygon.imagetest">
+    package="com.joepolygon.warpertoy">
 
     <uses-permission android:name="android.permission.CAMERA" />
 
@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ShowImages">
+        <activity android:name="com.joepolygon.warpertoy.ShowImages">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,22 +23,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RenderSettings"
+            android:name="com.joepolygon.warpertoy.RenderSettings"
             android:label="@string/title_activity_display_results"
-            android:parentActivityName=".ShowImages"
+            android:parentActivityName="com.joepolygon.warpertoy.ShowImages"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.joepolygon.imagetest.ShowImages" />
+                android:value="com.joepolygon.warpertoy.ShowImages" />
         </activity>
         <activity
-            android:name=".Playback"
+            android:name="com.joepolygon.warpertoy.Playback"
             android:label="@string/title_activity_playback"
-            android:parentActivityName=".RenderSettings"
+            android:parentActivityName="com.joepolygon.warpertoy.RenderSettings"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.joepolygon.imagetest.RenderSettings" />
+                android:value="com.joepolygon.warpertoy.RenderSettings" />
         </activity>
     </application>
 

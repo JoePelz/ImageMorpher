@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 /**
  * Represents a 2D point as two floats.  x and y are publically accessible values.

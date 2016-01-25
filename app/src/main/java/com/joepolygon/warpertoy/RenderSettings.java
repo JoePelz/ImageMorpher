@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 import android.content.Context;
 import android.content.Intent;
@@ -79,6 +79,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         restoreProject();
     }
 
+    /** Restore render settings from a saved file. */
     private boolean restoreProject() {
         //read project name
         projectName = Project.readProjectName(this);
@@ -110,6 +111,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         return true;
     }
 
+    /** Save render settings to a file */
     private void saveProject() {
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + "render.cfg");
 
@@ -131,6 +133,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
+    /** GUI callback, on pressing the "render frames" button */
     public void onRender(View v) {
         //create folder "frames"
         File f = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), projectName + File.separator + RENDER_FOLDER );
@@ -148,12 +151,14 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         updateProgressMessage();
     }
 
+    /** GUI callback, on pressing the "play result" button */
     public void onView(View v) {
         //switch to render view
         Intent intent = new Intent(this, Playback.class);
         startActivity(intent);
     }
 
+    /** Count the number of files in the render directory. */
     public static int getNumFramesRendered(Context app, String project) {
         File f = new File(app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), project + File.separator + RENDER_FOLDER );
         if (f.isDirectory() && f.canRead()) {
@@ -163,6 +168,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
+    /** Update the progress message to show the current number of files rendered. */
     public void updateProgressMessage() {
         pb.setMax(frames);
         int rendered = getNumFramesRendered(this, projectName);
@@ -173,6 +179,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         progressMessage.setText(temp);
     }
 
+    /** GUI callback to link the EditViews to the progress bars */
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         String text = v.getText().toString();
@@ -197,6 +204,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         return true;
     }
 
+    /** GUI callback to link the progress bars to the EditViews */
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (!fromUser)
@@ -225,6 +233,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
     }
 
+    /** Setter for number of frames to render */
     private void setFrames(int nFrames) {
         EditText field = (EditText) findViewById(R.id.valFrames);
         SeekBar sb = (SeekBar) findViewById(R.id.seekFrames);
@@ -239,6 +248,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
         }
         updateProgressMessage();
     }
+    /** Setter for weighting equation; A is the offset, to prevent division by 0. */
     private void setA(float dA) {
         EditText field = (EditText) findViewById(R.id.valA);
         SeekBar sb = (SeekBar) findViewById(R.id.seekA);
@@ -253,6 +263,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)(a * 1000 - 1));
         }
     }
+    /** Setter for weighting equation; B controls falloff, 1 is linear, 2 is exponential. */
     private void setB(float dB) {
         EditText field = (EditText) findViewById(R.id.valB);
         SeekBar  sb = (SeekBar) findViewById(R.id.seekB);
@@ -270,6 +281,7 @@ public class RenderSettings extends AppCompatActivity implements SeekBar.OnSeekB
             sb.setProgress((int)((b - 1) * 100));
         }
     }
+    /** Setter for weighting equation; P is the effect that the line length has on strength.  */
     private void setP(float dP) {
         EditText field = (EditText) findViewById(R.id.valP);
         SeekBar sb = (SeekBar) findViewById(R.id.seekP);

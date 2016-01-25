@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
@@ -32,7 +31,6 @@ public class ShowImages extends AppCompatActivity {
 
     private Project model;
 
-    //=====================   Life Cycle Methods ====================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +79,10 @@ public class ShowImages extends AppCompatActivity {
         });
     }
 
+    /**
+     * GUI callback to advance to the next view, render settings. Saves
+     * @param v The caller of the callback.
+     */
     public void build(View v) {
         //Save, before switching screens
         model.saveProject(model.getProject());
@@ -92,6 +94,10 @@ public class ShowImages extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * GUI callback to save the project.
+     * @param v
+     */
     public void actionSave(View v) {
         //save the current Project object to a file.
         if (model.saveProject(model.getProject())) {
@@ -101,6 +107,10 @@ public class ShowImages extends AppCompatActivity {
         }
     }
 
+    /**
+      * GUI callback to open a project. Will present a dialog to choose which project to open.
+      * @param v
+     */
     public void actionOpen(View v) {
         //replace the current Project object.
         final Context mainApp = this;
@@ -124,17 +134,22 @@ public class ShowImages extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Update the images based on project data.
+     */
     private void updateImages() {
         imgRight.updateImage();
         imgLeft.updateImage();
         imgEdit.updateImage();
     }
 
+    /** Save the instance to the given bundle. */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         model.saveState(outState);
     }
 
+    /** Handle the result of picking an image for the left or right from the gallery or camera. */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -185,6 +200,7 @@ public class ShowImages extends AppCompatActivity {
         }
     }
 
+    /** Handle starting the activity when choosing a picture for left or right. */
     private void selectImage(final int origin) {
 
         final CharSequence[] options = { "Take Photo", "Choose from Gallery","Cancel" };
@@ -222,6 +238,8 @@ public class ShowImages extends AppCompatActivity {
         builder.show();
     }
 
+    /** Response to permissions request. Not actually used outside of debugging.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == MY_REQUEST_CODE) {

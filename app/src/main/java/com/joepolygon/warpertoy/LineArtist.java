@@ -1,4 +1,4 @@
-package com.joepolygon.imagetest;
+package com.joepolygon.warpertoy;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -8,7 +8,6 @@ import android.graphics.PorterDuffXfermode;
 
 /**
  * Created to remove painting code from Line class.
- * Created by Joe on 2016-01-15.
  */
 class LineArtist {
     public static final Paint paintErasable = new Paint();
