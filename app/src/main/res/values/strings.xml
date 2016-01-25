@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Image Tester</string>
+    <string name="app_name">Warper Toy</string>
     <string name="edit_btnBuild">Build</string>
     <string name="edit_imgLeft_desc">The source image to morph from.</string>
     <string name="edit_imgRight_desc">The destination image to morph to.</string>
