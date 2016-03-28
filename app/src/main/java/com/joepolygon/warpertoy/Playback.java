@@ -1,30 +1,41 @@
 package com.joepolygon.warpertoy;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
-public class Playback extends AppCompatActivity {
+public class Playback extends AppCompatActivity implements MediaScannerConnection.OnScanCompletedListener {
     private String projectName;
     private int frameCount;
     private int frameLoaded;
     private int downX, downFrame;
     private ImageView imgView;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +57,53 @@ public class Playback extends AppCompatActivity {
         loadFrame(0);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu resource file.
+        getMenuInflater().inflate(R.menu.share_menu, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+        //mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        // Return true to display menu
+        return true;
+    }
+
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    @Override
+    public void onScanCompleted(String path, Uri uri) {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        shareIntent.setType("image/jpeg");
+        startActivity(Intent.createChooser(shareIntent, "Send image to..."));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.menu_item_share:
+                File img = getCurrentFrame();
+                String[] paths = new String[1];
+                paths[0] = img.getAbsolutePath();
+                String[] mimeTypes = new String[1];
+                mimeTypes[0] = "image/jpeg";
+                MediaScannerConnection.scanFile(this, paths, mimeTypes, this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
     /**
      * Handle touch events to allow the very slick swipe-animation that plays the warp.
      * @param event The touch event that triggered this callback
@@ -114,6 +172,19 @@ public class Playback extends AppCompatActivity {
             e.printStackTrace();
             //Toast.makeText(this, "Frame " + (frameNo+1) + " failed.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Returns the currently loaded image file.
+     * @return The file currently loaded and displayed.
+     */
+    private File getCurrentFrame() {
+        String fileName = String.format("%04d.jpg", frameLoaded);
+        return new File(
+                this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+                , projectName + File.separator
+                + RenderSettings.RENDER_FOLDER + File.separator
+                + fileName);
     }
 
     /**
